@@ -1,7 +1,10 @@
 use once_cell::sync::Lazy;
 use std::borrow::Cow;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::ops::Deref;
+use std::hash::Hash;
 
 pub trait Assertable: Debug {
     fn test_eq(&self, other: &Self) -> bool;
@@ -13,12 +16,20 @@ pub trait Assertable: Debug {
             other
         )
     }
+    fn assert_ne(&self, other: &Self) {
+        assert!(
+            !Self::test_eq(self, other),
+            "a = {:?}, b = {:?}",
+            self,
+            other
+        )
+    }
 }
 
 macro_rules! eq_assertable_impl {
     ($x:ty) => {
         impl Assertable for $x {
-            fn test_eq(&self, other: &Self) -> bool{
+            fn test_eq(&self, other: &Self) -> bool {
                 self.eq(other)
             }
         }
@@ -34,7 +45,7 @@ static ASSERTABLE_FLOAT_DIFF_MODE: Lazy<f64> = Lazy::new(|| {
 macro_rules! float_assertable_impl {
     ($x:ty) => {
         impl Assertable for $x {
-            fn test_eq(&self, other: &Self) -> bool{
+            fn test_eq(&self, other: &Self) -> bool {
                 (self - other).abs() < (*ASSERTABLE_FLOAT_DIFF_MODE.deref() as $x)
             }
         }
@@ -61,11 +72,11 @@ float_assertable_impl!(f32);
 float_assertable_impl!(f64);
 
 impl<K> Assertable for Option<K>
-    where
-        K: Assertable,
-        K: Debug,
+where
+    K: Assertable,
+    K: Debug,
 {
-    fn test_eq(&self, other: &Self) -> bool{
+    fn test_eq(&self, other: &Self) -> bool {
         match (self, other) {
             (None, None) => true,
             (Some(a), Some(b)) => a.test_eq(b),
@@ -75,13 +86,13 @@ impl<K> Assertable for Option<K>
 }
 
 impl<L, K> Assertable for Result<L, K>
-    where
-        L: Assertable,
-        L: Debug,
-        K: Assertable,
-        K: Debug,
+where
+    L: Assertable,
+    L: Debug,
+    K: Assertable,
+    K: Debug,
 {
-    fn test_eq(&self, other: &Self) -> bool{
+    fn test_eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Err(a), Err(b)) => a.test_eq(b),
             (Ok(a), Ok(b)) => a.test_eq(b),
@@ -91,22 +102,73 @@ impl<L, K> Assertable for Result<L, K>
 }
 
 impl<K> Assertable for Cow<'_, K>
-    where
-        K: Assertable,
-        K: Debug,
-        K: Clone,
+where
+    K: Assertable,
+    K: Debug,
+    K: Clone,
 {
-    fn test_eq(&self, other: &Self) -> bool{
+    fn test_eq(&self, other: &Self) -> bool {
         self.deref().test_eq(other.deref())
     }
 }
 
-#[cfg(test)]
-mod test {
-    use crate::Assertable;
+impl Assertable for () {
+    fn test_eq(&self, _: &Self) -> bool {
+        true
+    }
+}
 
-    #[test]
-    fn test() {
-        "a".assert_eq(&"a")
+impl<T> Assertable for PhantomData<T> {
+    fn test_eq(&self, _: &Self) -> bool {
+        true
+    }
+}
+
+impl<T> Assertable for Vec<T>
+where
+    T: Debug,
+    T: Assertable,
+{
+    fn test_eq(&self, other: &Self) -> bool {
+        self.iter().zip(other.iter()).all(|(a, b)| a.test_eq(b))
+    }
+}
+
+impl<T> Assertable for VecDeque<T>
+where
+    T: Debug,
+    T: Assertable,
+{
+    fn test_eq(&self, other: &Self) -> bool {
+        self.iter().zip(other.iter()).all(|(a, b)| a.test_eq(b))
+    }
+}
+
+impl<T, K> Assertable for HashMap<T, K>
+where
+    T: Debug,
+    T: Assertable,
+    T: Eq,
+    T: Hash,
+    K: Debug,
+    K: Assertable,
+{
+    fn test_eq(&self, other: &Self) -> bool {
+        self.len() == other.len()
+            && self
+                .keys()
+                .all(|x| other.get(x).map(|v| v.test_eq(&self[x])).unwrap_or(false))
+    }
+}
+
+impl<T> Assertable for HashSet<T>
+where
+    T: Debug,
+    T: Assertable,
+    T: Eq,
+    T: Hash,
+{
+    fn test_eq(&self, other: &Self) -> bool {
+        self.iter().all(|x| other.contains(x))
     }
 }
