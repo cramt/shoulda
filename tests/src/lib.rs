@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-
     mod empty_enum {
         use assertable::Assertable;
 
@@ -86,6 +85,19 @@ mod tests {
                 x: 2,
                 things: vec![7],
             })
+        }
+    }
+
+    mod lifetimes {
+        use assertable::Assertable;
+        use std::borrow::Cow;
+
+        #[derive(Debug, Assertable)]
+        struct LifeTimeStruct<'a>(Cow<'a, str>);
+
+        #[test]
+        fn lifetime_struct_matches() {
+            LifeTimeStruct("".into()).assert_eq(&LifeTimeStruct("".into()))
         }
     }
 }

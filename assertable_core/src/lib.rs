@@ -55,6 +55,7 @@ macro_rules! float_assertable_impl {
 
 eq_assertable_impl!(String);
 eq_assertable_impl!(&str);
+eq_assertable_impl!(str);
 eq_assertable_impl!(bool);
 eq_assertable_impl!(u8);
 eq_assertable_impl!(i8);

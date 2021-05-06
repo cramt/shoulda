@@ -26,7 +26,8 @@ pub fn assertable(input: TokenStream) -> TokenStream {
             Fields::Unnamed(u) => u
                 .unnamed
                 .iter()
-                .map(|x| x.ident.as_ref().unwrap())
+                .enumerate()
+                .map(|(x, _)| x.to_string().parse::<TokenStream2>().unwrap())
                 .map(|x| {
                     quote! {
                         self.#x.test_eq(&other.#x)
@@ -71,9 +72,11 @@ pub fn assertable(input: TokenStream) -> TokenStream {
         Data::Union(_) => panic!("assertable union types not supported"),
     };
 
+    let generics = input.generics;
+
     let expanded = quote! {
         #[cfg(test)]
-        impl ::assertable::Assertable for #name {
+        impl#generics ::assertable::Assertable for #name#generics {
             fn test_eq(&self, other: &Self) -> bool {
                 #body
             }

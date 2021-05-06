@@ -37,7 +37,8 @@ impl<K> Assertable for Cow<'_, K>
 where
     K: Assertable,
     K: Debug,
-    K: Clone,
+    K: ToOwned,
+    <K as ToOwned>::Owned: Debug,
 {
     fn test_eq(&self, other: &Self) -> bool {
         self.deref().test_eq(other.deref())
