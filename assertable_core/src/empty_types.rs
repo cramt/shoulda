@@ -1,5 +1,5 @@
-use std::marker::PhantomData;
 use crate::Assertable;
+use std::marker::PhantomData;
 
 impl Assertable for () {
     fn test_eq(&self, _: &Self) -> bool {

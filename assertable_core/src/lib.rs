@@ -1,7 +1,7 @@
-pub mod wrapper_types;
-pub mod empty_types;
 pub mod array_like;
 pub mod contains;
+pub mod empty_types;
+pub mod wrapper_types;
 
 use once_cell::sync::Lazy;
 use std::fmt::Debug;

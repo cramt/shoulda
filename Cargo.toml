@@ -1,14 +1,2 @@
-[package]
-name = "assertable"
-version = "0.1.0"
-authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-assertable_core = {path = "./assertable_core"}
-assertable_macro = {path = "./assertable_macro"}
-
 [workspace]
-members = ["assertable_core", "assertable_macro", "tests"]
+members = ["assertable_core", "assertable_macro", "assertable", "tests"]

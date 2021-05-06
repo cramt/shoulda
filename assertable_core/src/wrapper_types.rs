@@ -1,12 +1,12 @@
 use crate::Assertable;
-use std::fmt::Debug;
 use std::borrow::Cow;
+use std::fmt::Debug;
 use std::ops::Deref;
 
 impl<K> Assertable for Option<K>
-    where
-        K: Assertable,
-        K: Debug,
+where
+    K: Assertable,
+    K: Debug,
 {
     fn test_eq(&self, other: &Self) -> bool {
         match (self, other) {
@@ -18,11 +18,11 @@ impl<K> Assertable for Option<K>
 }
 
 impl<L, K> Assertable for Result<L, K>
-    where
-        L: Assertable,
-        L: Debug,
-        K: Assertable,
-        K: Debug,
+where
+    L: Assertable,
+    L: Debug,
+    K: Assertable,
+    K: Debug,
 {
     fn test_eq(&self, other: &Self) -> bool {
         match (self, other) {
@@ -34,10 +34,10 @@ impl<L, K> Assertable for Result<L, K>
 }
 
 impl<K> Assertable for Cow<'_, K>
-    where
-        K: Assertable,
-        K: Debug,
-        K: Clone,
+where
+    K: Assertable,
+    K: Debug,
+    K: Clone,
 {
     fn test_eq(&self, other: &Self) -> bool {
         self.deref().test_eq(other.deref())
