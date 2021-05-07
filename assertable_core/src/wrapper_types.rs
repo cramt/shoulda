@@ -39,6 +39,7 @@ where
     K: Debug,
     K: ToOwned,
     <K as ToOwned>::Owned: Debug,
+    K: ?Sized,
 {
     fn test_eq(&self, other: &Self) -> bool {
         self.deref().test_eq(other.deref())

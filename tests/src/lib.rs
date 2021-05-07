@@ -153,4 +153,18 @@ mod tests {
                 .assert_eq(&Vecs(vec![Cow::Owned(1), Cow::Borrowed(&2), Cow::Owned(3)]))
         }
     }
+
+    mod vec_of_cow_strs {
+        use assertable::Assertable;
+        use std::borrow::Cow;
+
+        #[derive(Debug, Assertable)]
+        struct Vecs<'a>(Vec<Cow<'a, str>>);
+
+        #[test]
+        fn vec_of_cow_strs() {
+            Vecs(vec![Cow::Borrowed("a"), Cow::Owned("b".to_string()), Cow::Borrowed("c")])
+                .assert_eq(&Vecs(vec![Cow::Owned("a".to_string()), Cow::Borrowed("b"), Cow::Owned("c".to_string())]))
+        }
+    }
 }
