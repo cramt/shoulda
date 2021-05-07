@@ -45,3 +45,13 @@ where
         self.deref().test_eq(other.deref())
     }
 }
+
+impl<T> Assertable for Box<T>
+where
+    T: Assertable,
+    T: ?Sized,
+{
+    fn test_eq(&self, other: &Self) -> bool {
+        self.deref().test_eq(other.deref())
+    }
+}

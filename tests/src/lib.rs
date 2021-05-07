@@ -80,11 +80,11 @@ mod tests {
                 x: 2,
                 things: vec![7],
             }
-                .assert_eq(&Struct {
-                    something: "a".to_string(),
-                    x: 2,
-                    things: vec![7],
-                })
+            .assert_eq(&Struct {
+                something: "a".to_string(),
+                x: 2,
+                things: vec![7],
+            })
         }
     }
 
@@ -109,8 +109,7 @@ mod tests {
 
         #[test]
         fn generic_hell() {
-            GenericHell(vec![Some(vec![Ok(2)])])
-                .assert_eq(&GenericHell(vec![Some(vec![Ok(2)])]))
+            GenericHell(vec![Some(vec![Ok(2)])]).assert_eq(&GenericHell(vec![Some(vec![Ok(2)])]))
         }
     }
 
@@ -123,8 +122,7 @@ mod tests {
 
         #[test]
         fn optional_cow() {
-            OptionalCow(Some(Cow::Owned(2)))
-                .assert_eq(&OptionalCow(Some(Cow::Borrowed(&2))))
+            OptionalCow(Some(Cow::Owned(2))).assert_eq(&OptionalCow(Some(Cow::Borrowed(&2))))
         }
     }
 
@@ -149,8 +147,11 @@ mod tests {
 
         #[test]
         fn vec_of_cows() {
-            Vecs(vec![Cow::Borrowed(&1), Cow::Owned(2), Cow::Borrowed(&3)])
-                .assert_eq(&Vecs(vec![Cow::Owned(1), Cow::Borrowed(&2), Cow::Owned(3)]))
+            Vecs(vec![Cow::Borrowed(&1), Cow::Owned(2), Cow::Borrowed(&3)]).assert_eq(&Vecs(vec![
+                Cow::Owned(1),
+                Cow::Borrowed(&2),
+                Cow::Owned(3),
+            ]))
         }
     }
 
@@ -163,8 +164,16 @@ mod tests {
 
         #[test]
         fn vec_of_cow_strs() {
-            Vecs(vec![Cow::Borrowed("a"), Cow::Owned("b".to_string()), Cow::Borrowed("c")])
-                .assert_eq(&Vecs(vec![Cow::Owned("a".to_string()), Cow::Borrowed("b"), Cow::Owned("c".to_string())]))
+            Vecs(vec![
+                Cow::Borrowed("a"),
+                Cow::Owned("b".to_string()),
+                Cow::Borrowed("c"),
+            ])
+            .assert_eq(&Vecs(vec![
+                Cow::Owned("a".to_string()),
+                Cow::Borrowed("b"),
+                Cow::Owned("c".to_string()),
+            ]))
         }
     }
 }
