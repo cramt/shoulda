@@ -82,5 +82,6 @@ pub fn assertable(input: TokenStream) -> TokenStream {
             }
         }
     };
+    //panic!("{}", expanded.to_string());
     TokenStream::from(expanded)
 }

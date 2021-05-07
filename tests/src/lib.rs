@@ -80,11 +80,11 @@ mod tests {
                 x: 2,
                 things: vec![7],
             }
-            .assert_eq(&Struct {
-                something: "a".to_string(),
-                x: 2,
-                things: vec![7],
-            })
+                .assert_eq(&Struct {
+                    something: "a".to_string(),
+                    x: 2,
+                    things: vec![7],
+                })
         }
     }
 
@@ -98,6 +98,59 @@ mod tests {
         #[test]
         fn lifetime_struct_matches() {
             LifeTimeStruct("".into()).assert_eq(&LifeTimeStruct("".into()))
+        }
+    }
+
+    mod highly_nested_generic {
+        use assertable::Assertable;
+
+        #[derive(Debug, Assertable)]
+        struct GenericHell(Vec<Option<Vec<Result<u32, ()>>>>);
+
+        #[test]
+        fn generic_hell() {
+            GenericHell(vec![Some(vec![Ok(2)])])
+                .assert_eq(&GenericHell(vec![Some(vec![Ok(2)])]))
+        }
+    }
+
+    mod optional_cow {
+        use assertable::Assertable;
+        use std::borrow::Cow;
+
+        #[derive(Debug, Assertable)]
+        struct OptionalCow<'a>(Option<Cow<'a, i32>>);
+
+        #[test]
+        fn optional_cow() {
+            OptionalCow(Some(Cow::Owned(2)))
+                .assert_eq(&OptionalCow(Some(Cow::Borrowed(&2))))
+        }
+    }
+
+    mod vecs {
+        use assertable::Assertable;
+
+        #[derive(Debug, Assertable)]
+        struct Vecs<'a>(Vec<&'a u64>);
+
+        #[test]
+        fn vecs() {
+            Vecs(vec![&1, &2, &3]).assert_eq(&Vecs(vec![&1, &2, &3]))
+        }
+    }
+
+    mod vec_of_cows {
+        use assertable::Assertable;
+        use std::borrow::Cow;
+
+        #[derive(Debug, Assertable)]
+        struct Vecs<'a>(Vec<Cow<'a, u64>>);
+
+        #[test]
+        fn vec_of_cows() {
+            Vecs(vec![Cow::Borrowed(&1), Cow::Owned(2), Cow::Borrowed(&3)])
+                .assert_eq(&Vecs(vec![Cow::Owned(1), Cow::Borrowed(&2), Cow::Owned(3)]))
         }
     }
 }
