@@ -1,6 +1,7 @@
 pub mod array_like;
 pub mod contains;
 pub mod empty_types;
+pub mod specific_assert;
 #[cfg(test)]
 mod tests;
 pub mod wrapper_types;
