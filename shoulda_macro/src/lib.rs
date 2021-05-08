@@ -1,10 +1,9 @@
-use proc_macro::TokenStream;
 use quote::quote;
 use syn::__private::TokenStream2;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
 #[proc_macro_derive(Shoulda)]
-pub fn shoulda(input: TokenStream) -> TokenStream {
+pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = input.ident;
     let body = match input.data {
@@ -83,5 +82,5 @@ pub fn shoulda(input: TokenStream) -> TokenStream {
         }
     };
     //panic!("{}", expanded.to_string());
-    TokenStream::from(expanded)
+    proc_macro::TokenStream::from(expanded)
 }
