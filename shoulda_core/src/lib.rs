@@ -36,6 +36,9 @@ impl<'a, T> Should<'a, T> where T: Shoulda {
     pub fn be(self) -> Self {
         self
     }
+    pub fn and(self) -> Self {
+        self
+    }
 }
 
 pub struct ShouldNot<'a, T> {
@@ -62,6 +65,9 @@ impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
         }
     }
     pub fn be(self) -> Self {
+        self
+    }
+    pub fn and(self) -> Self {
         self
     }
 }
