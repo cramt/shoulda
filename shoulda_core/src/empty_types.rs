@@ -1,13 +1,13 @@
-use crate::Assertable;
+use crate::Shoulda;
 use std::marker::PhantomData;
 
-impl Assertable for () {
+impl Shoulda for () {
     fn test_eq(&self, _: &Self) -> bool {
         true
     }
 }
 
-impl<T> Assertable for PhantomData<T> {
+impl<T> Shoulda for PhantomData<T> {
     fn test_eq(&self, _: &Self) -> bool {
         true
     }

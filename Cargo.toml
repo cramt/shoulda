@@ -1,2 +1,2 @@
 [workspace]
-members = ["assertable_core", "assertable_macro", "assertable", "tests"]
+members = ["shoulda_core", "shoulda_macro", "shoulda", "tests"]

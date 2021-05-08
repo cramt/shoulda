@@ -1,11 +1,11 @@
-use crate::Assertable;
+use crate::Shoulda;
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::ops::Deref;
 
-impl<K> Assertable for Option<K>
+impl<K> Shoulda for Option<K>
 where
-    K: Assertable,
+    K: Shoulda,
     K: Debug,
 {
     fn test_eq(&self, other: &Self) -> bool {
@@ -17,11 +17,11 @@ where
     }
 }
 
-impl<L, K> Assertable for Result<L, K>
+impl<L, K> Shoulda for Result<L, K>
 where
-    L: Assertable,
+    L: Shoulda,
     L: Debug,
-    K: Assertable,
+    K: Shoulda,
     K: Debug,
 {
     fn test_eq(&self, other: &Self) -> bool {
@@ -33,9 +33,9 @@ where
     }
 }
 
-impl<K> Assertable for Cow<'_, K>
+impl<K> Shoulda for Cow<'_, K>
 where
-    K: Assertable,
+    K: Shoulda,
     K: Debug,
     K: ToOwned,
     <K as ToOwned>::Owned: Debug,
@@ -46,9 +46,9 @@ where
     }
 }
 
-impl<T> Assertable for Box<T>
+impl<T> Shoulda for Box<T>
 where
-    T: Assertable,
+    T: Shoulda,
     T: ?Sized,
 {
     fn test_eq(&self, other: &Self) -> bool {

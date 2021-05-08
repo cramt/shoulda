@@ -3,8 +3,8 @@ use quote::quote;
 use syn::__private::TokenStream2;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
-#[proc_macro_derive(Assertable)]
-pub fn assertable(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(Shoulda)]
+pub fn shoulda(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = input.ident;
     let body = match input.data {
@@ -76,7 +76,7 @@ pub fn assertable(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         #[cfg(test)]
-        impl#generics ::assertable::Assertable for #name#generics {
+        impl#generics ::shoulda::Shoulda for #name#generics {
             fn test_eq(&self, other: &Self) -> bool {
                 #body
             }

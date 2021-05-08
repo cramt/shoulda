@@ -9,30 +9,69 @@ pub mod wrapper_types;
 use once_cell::sync::Lazy;
 use std::fmt::Debug;
 use std::ops::Deref;
+use std::borrow::Borrow;
 
-pub trait Assertable: Debug {
-    fn test_eq(&self, other: &Self) -> bool;
-    fn assert_eq(&self, other: &Self) {
+pub struct Should<'a, T> {
+    inner: &'a T,
+}
+
+impl<'a, T> Should<'a, T> where T: Shoulda {
+    pub fn eq<K: Borrow<T>>(&self, other: K) {
+        let other = other.borrow();
         assert!(
-            Self::test_eq(self, other),
+            self.inner.test_eq(other),
             "a = {:?}, b = {:?}",
-            self,
+            &self.inner,
             other
         )
     }
-    fn assert_ne(&self, other: &Self) {
+
+    pub fn equal<K: Borrow<T>>(&self, other: K) {
+        self.eq(other)
+    }
+    pub fn not(&self) -> ShouldNot<'a, T> {
+        ShouldNot {
+            inner: self.inner
+        }
+    }
+}
+
+pub struct ShouldNot<'a, T> {
+    inner: &'a T,
+}
+
+impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
+    pub fn eq<K: Borrow<T>>(&self, other: K) {
+        let other = other.borrow();
         assert!(
-            !Self::test_eq(self, other),
+            !self.inner.test_eq(other),
             "a = {:?}, b = {:?}",
-            self,
+            &self.inner,
             other
         )
+    }
+    pub fn equal<K: Borrow<T>>(&self, other: K) {
+        self.eq(other)
+    }
+    pub fn not(&self) -> Should<'a, T> {
+        Should {
+            inner: self.inner
+        }
+    }
+}
+
+pub trait Shoulda: Debug {
+    fn test_eq(&self, other: &Self) -> bool;
+    fn should(&self) -> Should<Self> where Self: Sized {
+        Should {
+            inner: self
+        }
     }
 }
 
 macro_rules! eq_assertable_impl {
     ($x:ty) => {
-        impl Assertable for $x {
+        impl Shoulda for $x {
             fn test_eq(&self, other: &Self) -> bool {
                 self.eq(other)
             }
@@ -48,7 +87,7 @@ static ASSERTABLE_FLOAT_DIFF_MODE: Lazy<f64> = Lazy::new(|| {
 
 macro_rules! float_assertable_impl {
     ($x:ty) => {
-        impl Assertable for $x {
+        impl Shoulda for $x {
             fn test_eq(&self, other: &Self) -> bool {
                 (self - other).abs() < (*ASSERTABLE_FLOAT_DIFF_MODE.deref() as $x)
             }
@@ -75,9 +114,9 @@ eq_assertable_impl!(isize);
 float_assertable_impl!(f32);
 float_assertable_impl!(f64);
 
-impl<T> Assertable for &T
-where
-    T: Assertable,
+impl<T> Shoulda for &T
+    where
+        T: Shoulda,
 {
     fn test_eq(&self, other: &Self) -> bool {
         T::test_eq(self, other)

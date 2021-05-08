@@ -1,4 +1,4 @@
-use crate::Assertable;
+use crate::Shoulda;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -6,10 +6,10 @@ use std::ops::{Range, RangeInclusive};
 
 macro_rules! zip_all_test_eq_assertable_impl {
     ($x:ty) => {
-        impl<T> Assertable for $x
+        impl<T> Shoulda for $x
         where
             T: Debug,
-            T: Assertable,
+            T: Shoulda,
         {
             fn test_eq(&self, other: &Self) -> bool {
                 self.iter().zip(other.iter()).all(|(a, b)| a.test_eq(b))
@@ -23,14 +23,14 @@ zip_all_test_eq_assertable_impl!(VecDeque<T>);
 zip_all_test_eq_assertable_impl!(&[T]);
 zip_all_test_eq_assertable_impl!([T]);
 
-impl<T, K> Assertable for HashMap<T, K>
+impl<T, K> Shoulda for HashMap<T, K>
 where
     T: Debug,
-    T: Assertable,
+    T: Shoulda,
     T: Eq,
     T: Hash,
     K: Debug,
-    K: Assertable,
+    K: Shoulda,
 {
     fn test_eq(&self, other: &Self) -> bool {
         self.len() == other.len()
@@ -40,10 +40,10 @@ where
     }
 }
 
-impl<T> Assertable for HashSet<T>
+impl<T> Shoulda for HashSet<T>
 where
     T: Debug,
-    T: Assertable,
+    T: Shoulda,
     T: Eq,
     T: Hash,
 {
@@ -52,20 +52,20 @@ where
     }
 }
 
-impl<T> Assertable for Range<T>
+impl<T> Shoulda for Range<T>
 where
     T: Debug,
-    T: Assertable,
+    T: Shoulda,
 {
     fn test_eq(&self, other: &Self) -> bool {
         self.start.test_eq(&other.start) && self.end.test_eq(&other.end)
     }
 }
 
-impl<T> Assertable for RangeInclusive<T>
+impl<T> Shoulda for RangeInclusive<T>
 where
     T: Debug,
-    T: Assertable,
+    T: Shoulda,
 {
     fn test_eq(&self, other: &Self) -> bool {
         self.start().test_eq(other.start()) && self.end().test_eq(other.end())

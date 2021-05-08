@@ -1,5 +1,5 @@
 [package]
-name = "assertable"
+name = "shoulda"
 version = "0.1.0"
 authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
 edition = "2018"
@@ -11,5 +11,5 @@ repository = "https://github.com/cramt/assertable"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-assertable_macro = {path = "../assertable_macro"}
-assertable_core= {path = "../assertable_core"}
+shoulda_macro = {path = "../shoulda_macro" }
+shoulda_core= {path = "../shoulda_core" }
