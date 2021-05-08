@@ -2,7 +2,7 @@ use crate::Should;
 use std::fmt::Debug;
 
 impl<'a, T: Debug> Should<'a, Option<T>> {
-    pub fn none(self) -> Self{
+    pub fn none(self) -> Self {
         assert!(
             self.inner.is_none(),
             "{:?} is Some, None expected",
@@ -17,7 +17,7 @@ impl<'a, T: Debug> Should<'a, Option<T>> {
             &self.inner,
         );
         Should {
-            inner: self.inner.as_ref().unwrap()
+            inner: self.inner.as_ref().unwrap(),
         }
     }
 }

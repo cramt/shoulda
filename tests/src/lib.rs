@@ -41,24 +41,41 @@ mod tests {
         #[test]
         fn variant_and_value_match() {
             FullEnum::A(42).should().eq(FullEnum::A(42));
-            FullEnum::B("a".to_string()).should().eq(FullEnum::B("a".to_string()));
+            FullEnum::B("a".to_string())
+                .should()
+                .eq(FullEnum::B("a".to_string()));
             FullEnum::C(Err(())).should().eq(FullEnum::C(Err(())));
         }
 
         #[test]
         fn variant_matches_and_value_doesnt_match() {
             FullEnum::A(42).should().not().eq(FullEnum::A(41));
-            FullEnum::B("a".to_string()).should().not().eq(FullEnum::B("b".to_string()));
+            FullEnum::B("a".to_string())
+                .should()
+                .not()
+                .eq(FullEnum::B("b".to_string()));
             FullEnum::C(Ok(1)).should().not().eq(FullEnum::C(Ok(2)));
         }
 
         #[test]
         fn variants_doesnt_doesnt_match() {
-            FullEnum::A(42).should().not().eq(FullEnum::B("a".to_string()));
+            FullEnum::A(42)
+                .should()
+                .not()
+                .eq(FullEnum::B("a".to_string()));
             FullEnum::A(42).should().not().eq(FullEnum::C(Err(())));
-            FullEnum::B("a".to_string()).should().not().eq(FullEnum::A(42));
-            FullEnum::B("a".to_string()).should().not().eq(FullEnum::C(Err(())));
-            FullEnum::C(Err(())).should().not().eq(FullEnum::B("a".to_string()));
+            FullEnum::B("a".to_string())
+                .should()
+                .not()
+                .eq(FullEnum::A(42));
+            FullEnum::B("a".to_string())
+                .should()
+                .not()
+                .eq(FullEnum::C(Err(())));
+            FullEnum::C(Err(()))
+                .should()
+                .not()
+                .eq(FullEnum::B("a".to_string()));
             FullEnum::C(Err(())).should().not().eq(FullEnum::A(42));
         }
     }
@@ -80,11 +97,12 @@ mod tests {
                 x: 2,
                 things: vec![7],
             }
-            .should().eq(Struct {
+            .should()
+            .eq(Struct {
                 something: "a".to_string(),
                 x: 2,
                 things: vec![7],
-            })
+            });
         }
     }
 
@@ -97,7 +115,9 @@ mod tests {
 
         #[test]
         fn lifetime_struct_matches() {
-            LifeTimeStruct("".into()).should().eq(LifeTimeStruct("".into()))
+            LifeTimeStruct("".into())
+                .should()
+                .eq(LifeTimeStruct("".into()));
         }
     }
 
@@ -109,7 +129,9 @@ mod tests {
 
         #[test]
         fn generic_hell() {
-            GenericHell(vec![Some(vec![Ok(2)])]).should().eq(GenericHell(vec![Some(vec![Ok(2)])]))
+            GenericHell(vec![Some(vec![Ok(2)])])
+                .should()
+                .eq(GenericHell(vec![Some(vec![Ok(2)])]));
         }
     }
 
@@ -122,7 +144,9 @@ mod tests {
 
         #[test]
         fn optional_cow() {
-            OptionalCow(Some(Cow::Owned(2))).should().eq(OptionalCow(Some(Cow::Borrowed(&2))))
+            OptionalCow(Some(Cow::Owned(2)))
+                .should()
+                .eq(OptionalCow(Some(Cow::Borrowed(&2))));
         }
     }
 
@@ -134,7 +158,7 @@ mod tests {
 
         #[test]
         fn vecs() {
-            Vecs(vec![&1, &2, &3]).should().eq(Vecs(vec![&1, &2, &3]))
+            Vecs(vec![&1, &2, &3]).should().eq(Vecs(vec![&1, &2, &3]));
         }
     }
 
@@ -147,11 +171,9 @@ mod tests {
 
         #[test]
         fn vec_of_cows() {
-            Vecs(vec![Cow::Borrowed(&1), Cow::Owned(2), Cow::Borrowed(&3)]).should().eq(Vecs(vec![
-                Cow::Owned(1),
-                Cow::Borrowed(&2),
-                Cow::Owned(3),
-            ]))
+            Vecs(vec![Cow::Borrowed(&1), Cow::Owned(2), Cow::Borrowed(&3)])
+                .should()
+                .eq(Vecs(vec![Cow::Owned(1), Cow::Borrowed(&2), Cow::Owned(3)]));
         }
     }
 
@@ -169,11 +191,12 @@ mod tests {
                 Cow::Owned("b".to_string()),
                 Cow::Borrowed("c"),
             ])
-            .should().eq(Vecs(vec![
+            .should()
+            .eq(Vecs(vec![
                 Cow::Owned("a".to_string()),
                 Cow::Borrowed("b"),
                 Cow::Owned("c".to_string()),
-            ]))
+            ]));
         }
     }
 }

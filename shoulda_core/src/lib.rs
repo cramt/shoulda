@@ -6,15 +6,18 @@ mod tests;
 pub mod wrapper_types;
 
 use once_cell::sync::Lazy;
+use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::ops::Deref;
-use std::borrow::Borrow;
 
 pub struct Should<'a, T> {
     inner: &'a T,
 }
 
-impl<'a, T> Should<'a, T> where T: Shoulda {
+impl<'a, T> Should<'a, T>
+where
+    T: Shoulda,
+{
     pub fn eq<K: Borrow<T>>(self, other: K) -> Self {
         let other = other.borrow();
         assert!(
@@ -29,9 +32,7 @@ impl<'a, T> Should<'a, T> where T: Shoulda {
         self.eq(other)
     }
     pub fn not(self) -> ShouldNot<'a, T> {
-        ShouldNot {
-            inner: self.inner
-        }
+        ShouldNot { inner: self.inner }
     }
     pub fn be(self) -> Self {
         self
@@ -45,7 +46,10 @@ pub struct ShouldNot<'a, T> {
     inner: &'a T,
 }
 
-impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
+impl<'a, T> ShouldNot<'a, T>
+where
+    T: Shoulda,
+{
     pub fn eq<K: Borrow<T>>(self, other: K) -> Should<'a, T> {
         let other = other.borrow();
         assert!(
@@ -60,9 +64,7 @@ impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
         self.eq(other)
     }
     pub fn not(self) -> Should<'a, T> {
-        Should {
-            inner: self.inner
-        }
+        Should { inner: self.inner }
     }
     pub fn be(self) -> Self {
         self
@@ -74,10 +76,11 @@ impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
 
 pub trait Shoulda: Debug {
     fn test_eq(&self, other: &Self) -> bool;
-    fn should(&self) -> Should<Self> where Self: Sized {
-        Should {
-            inner: self
-        }
+    fn should(&self) -> Should<Self>
+    where
+        Self: Sized,
+    {
+        Should { inner: self }
     }
 }
 
@@ -127,8 +130,8 @@ float_assertable_impl!(f32);
 float_assertable_impl!(f64);
 
 impl<T> Shoulda for &T
-    where
-        T: Shoulda,
+where
+    T: Shoulda,
 {
     fn test_eq(&self, other: &Self) -> bool {
         T::test_eq(self, other)
