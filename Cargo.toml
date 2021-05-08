@@ -1,2 +1,20 @@
+[package]
+name = "shoulda"
+version = "0.1.0"
+authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "derive macro for test assertions"
+homepage = "https://github.com/cramt/shoulda"
+repository = "https://github.com/cramt/shoulda"
+documentation = "https://github.com/cramt/shoulda"
+keywords = ["test", "BDD", "TDD", "assertion"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+shoulda_macro = { path = "./shoulda_macro", version = "0.1.0" }
+shoulda_core = { path = "./shoulda_core", version = "0.1.0" }
+
 [workspace]
-members = ["shoulda_core", "shoulda_macro", "shoulda", "tests"]
+members = ["shoulda_core", "shoulda_macro", "tests"]
