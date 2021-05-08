@@ -83,8 +83,8 @@ macro_rules! eq_assertable_impl {
     };
 }
 
-static ASSERTABLE_FLOAT_DIFF_MODE: Lazy<f64> = Lazy::new(|| {
-    option_env!("ASSERTABLE_FLOAT_DIFF_MODE")
+static SHOULDA_FLOAT_DIFF_MODE: Lazy<f64> = Lazy::new(|| {
+    option_env!("SHOULDA_FLOAT_DIFF_MODE")
         .map(|x| x.parse().unwrap())
         .unwrap_or(0.0001)
 });
@@ -93,7 +93,7 @@ macro_rules! float_assertable_impl {
     ($x:ty) => {
         impl Shoulda for $x {
             fn test_eq(&self, other: &Self) -> bool {
-                (self - other).abs() < (*ASSERTABLE_FLOAT_DIFF_MODE.deref() as $x)
+                (self - other).abs() < (*SHOULDA_FLOAT_DIFF_MODE.deref() as $x)
             }
         }
     };
