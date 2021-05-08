@@ -7,9 +7,11 @@ license = "MIT"
 description = "derive macro for test assertions"
 homepage = "https://github.com/cramt/assertable"
 repository = "https://github.com/cramt/assertable"
+documentation = "https://github.com/cramt/assertable"
+keywords = ["test", "BDD", "TDD", "assertion"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-shoulda_macro = {path = "../shoulda_macro" }
-shoulda_core= {path = "../shoulda_core" }
+shoulda_macro = { path = "../shoulda_macro", version = "0.1.0" }
+shoulda_core = { path = "../shoulda_core", version = "0.1.0" }
