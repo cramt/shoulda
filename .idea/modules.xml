@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/assertable.iml" filepath="$PROJECT_DIR$/assertable.iml" />
+      <module fileurl="file://$PROJECT_DIR$/shoulda.iml" filepath="$PROJECT_DIR$/shoulda.iml" />
     </modules>
   </component>
 </project>
