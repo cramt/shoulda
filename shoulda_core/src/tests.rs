@@ -11,3 +11,8 @@ fn vec_cow_str() {
     Cow::Borrowed("").should().eq(Cow::Borrowed(""));
     vec![Cow::Borrowed("")].should().eq(vec![Cow::Owned(String::new())]);
 }
+
+#[test]
+fn contains() {
+    vec![1, 2, 3].should().contains(|x| x.eq(&2));
+}

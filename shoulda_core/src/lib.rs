@@ -1,7 +1,6 @@
 pub mod array_like;
-pub mod contains;
 pub mod empty_types;
-pub mod specific_assert;
+pub mod specifics;
 #[cfg(test)]
 mod tests;
 pub mod wrapper_types;
@@ -16,7 +15,7 @@ pub struct Should<'a, T> {
 }
 
 impl<'a, T> Should<'a, T> where T: Shoulda {
-    pub fn eq<K: Borrow<T>>(&self, other: K) {
+    pub fn eq<K: Borrow<T>>(self, other: K) {
         let other = other.borrow();
         assert!(
             self.inner.test_eq(other),
@@ -25,14 +24,16 @@ impl<'a, T> Should<'a, T> where T: Shoulda {
             other
         )
     }
-
-    pub fn equal<K: Borrow<T>>(&self, other: K) {
+    pub fn equal<K: Borrow<T>>(self, other: K) {
         self.eq(other)
     }
-    pub fn not(&self) -> ShouldNot<'a, T> {
+    pub fn not(self) -> ShouldNot<'a, T> {
         ShouldNot {
             inner: self.inner
         }
+    }
+    pub fn be(self) -> Self {
+        self
     }
 }
 
@@ -41,7 +42,7 @@ pub struct ShouldNot<'a, T> {
 }
 
 impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
-    pub fn eq<K: Borrow<T>>(&self, other: K) {
+    pub fn eq<K: Borrow<T>>(self, other: K) {
         let other = other.borrow();
         assert!(
             !self.inner.test_eq(other),
@@ -50,13 +51,16 @@ impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
             other
         )
     }
-    pub fn equal<K: Borrow<T>>(&self, other: K) {
+    pub fn equal<K: Borrow<T>>(self, other: K) {
         self.eq(other)
     }
-    pub fn not(&self) -> Should<'a, T> {
+    pub fn not(self) -> Should<'a, T> {
         Should {
             inner: self.inner
         }
+    }
+    pub fn be(self) -> Self {
+        self
     }
 }
 
