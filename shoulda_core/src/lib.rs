@@ -15,16 +15,17 @@ pub struct Should<'a, T> {
 }
 
 impl<'a, T> Should<'a, T> where T: Shoulda {
-    pub fn eq<K: Borrow<T>>(self, other: K) {
+    pub fn eq<K: Borrow<T>>(self, other: K) -> Self {
         let other = other.borrow();
         assert!(
             self.inner.test_eq(other),
             "a = {:?}, b = {:?}",
             &self.inner,
             other
-        )
+        );
+        self
     }
-    pub fn equal<K: Borrow<T>>(self, other: K) {
+    pub fn equal<K: Borrow<T>>(self, other: K) -> Self {
         self.eq(other)
     }
     pub fn not(self) -> ShouldNot<'a, T> {
@@ -42,16 +43,17 @@ pub struct ShouldNot<'a, T> {
 }
 
 impl<'a, T> ShouldNot<'a, T> where T: Shoulda {
-    pub fn eq<K: Borrow<T>>(self, other: K) {
+    pub fn eq<K: Borrow<T>>(self, other: K) -> Should<'a, T> {
         let other = other.borrow();
         assert!(
             !self.inner.test_eq(other),
             "a = {:?}, b = {:?}",
             &self.inner,
             other
-        )
+        );
+        self.not()
     }
-    pub fn equal<K: Borrow<T>>(self, other: K) {
+    pub fn equal<K: Borrow<T>>(self, other: K) -> Should<'a, T> {
         self.eq(other)
     }
     pub fn not(self) -> Should<'a, T> {

@@ -3,7 +3,7 @@ use std::borrow::Cow;
 
 #[test]
 fn vec_cow_i32() {
-    vec![Cow::Borrowed(&1)].should().eq(vec![Cow::Owned(1)])
+    vec![Cow::Borrowed(&1)].should().eq(vec![Cow::Owned(1)]);
 }
 
 #[test]
