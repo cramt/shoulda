@@ -1,38 +1,59 @@
 pub mod array_like;
+pub mod assertion_hook;
 pub mod empty_types;
 pub mod specifics;
 #[cfg(test)]
 mod tests;
 pub mod wrapper_types;
 
+use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook};
 use once_cell::sync::Lazy;
 use std::borrow::Borrow;
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::ops::Deref;
 
-pub struct Should<'a, T> {
-    inner: &'a T,
+pub struct Should<'a, Inner, Hook: AssertionHook = NoOpAssertionHook> {
+    inner: &'a Inner,
+    hook: PhantomData<Hook>,
 }
 
-impl<'a, T> Should<'a, T>
+impl<'a, Inner, Hook> Should<'a, Inner, Hook>
 where
-    T: Shoulda,
+    Hook: AssertionHook,
 {
-    pub fn eq<K: Borrow<T>>(self, other: K) -> Self {
+    pub(crate) fn internal_assert(&self, initial: bool, message: String) {
+        assert!(Hook::run(initial), "{}{}", Hook::message_prefix(), message);
+    }
+    pub(crate) fn change_hook<T: AssertionHook>(self) -> Should<'a, Inner, T> {
+        Should::new(self.inner)
+    }
+    pub(crate) fn normalize(self) -> Should<'a, Inner, NoOpAssertionHook> {
+        self.change_hook()
+    }
+    pub(crate) fn new(inner: &'a Inner) -> Self {
+        Self {
+            inner,
+            hook: Default::default(),
+        }
+    }
+}
+
+impl<'a, Inner, Hook> Should<'a, Inner, Hook>
+where
+    Inner: Shoulda,
+    Hook: AssertionHook,
+{
+    pub fn eq<K: Borrow<Inner>>(self, other: K) -> Self {
         let other = other.borrow();
-        assert!(
+        self.internal_assert(
             self.inner.test_eq(other),
-            "a = {:?}, b = {:?}",
-            &self.inner,
-            other
+            format!("expected = {:?}, actual = {:?}", &self.inner, other),
         );
         self
     }
-    pub fn equal<K: Borrow<T>>(self, other: K) -> Self {
+    pub fn equal<K: Borrow<Inner>>(self, other: K) -> Self {
         self.eq(other)
-    }
-    pub fn not(self) -> ShouldNot<'a, T> {
-        ShouldNot { inner: self.inner }
     }
     pub fn be(self) -> Self {
         self
@@ -42,35 +63,21 @@ where
     }
 }
 
-pub struct ShouldNot<'a, T> {
-    inner: &'a T,
-}
-
-impl<'a, T> ShouldNot<'a, T>
+impl<'a, Inner> Should<'a, Inner, NoOpAssertionHook>
 where
-    T: Shoulda,
+    Inner: Shoulda,
 {
-    pub fn eq<K: Borrow<T>>(self, other: K) -> Should<'a, T> {
-        let other = other.borrow();
-        assert!(
-            !self.inner.test_eq(other),
-            "a = {:?}, b = {:?}",
-            &self.inner,
-            other
-        );
-        self.not()
+    pub fn not(self) -> Should<'a, Inner, NotAssertionHook> {
+        self.change_hook()
     }
-    pub fn equal<K: Borrow<T>>(self, other: K) -> Should<'a, T> {
-        self.eq(other)
-    }
-    pub fn not(self) -> Should<'a, T> {
-        Should { inner: self.inner }
-    }
-    pub fn be(self) -> Self {
-        self
-    }
-    pub fn and(self) -> Self {
-        self
+}
+
+impl<'a, Inner> Should<'a, Inner, NotAssertionHook>
+where
+    Inner: Shoulda,
+{
+    pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook> {
+        self.change_hook()
     }
 }
 
@@ -80,7 +87,7 @@ pub trait Shoulda: Debug {
     where
         Self: Sized,
     {
-        Should { inner: self }
+        Should::new(self)
     }
 }
 

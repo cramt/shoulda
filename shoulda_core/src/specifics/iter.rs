@@ -1,4 +1,5 @@
-use crate::{Should, ShouldNot, Shoulda};
+use crate::assertion_hook::{AssertionHook, NoOpAssertionHook};
+use crate::{Should, Shoulda};
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
@@ -36,90 +37,49 @@ fn contains_sequence<K: Shoulda, L: Borrow<K>>(sequence: &Vec<L>, v: &Vec<&K>) -
     } || (curr.is_some() && curr.unwrap() == sequence.len()))
 }
 
-impl<'a, T, K> Should<'a, T>
-    where
-        &'a T: IntoIterator<Item=&'a K>,
-        T: Debug,
-        K: Debug,
-        K: Shoulda,
-        K: 'a,
+impl<'a, T, K, Hook> Should<'a, T, Hook>
+where
+    &'a T: IntoIterator<Item = &'a K>,
+    T: Debug,
+    K: Debug,
+    K: Shoulda,
+    K: 'a,
+    Hook: AssertionHook,
 {
-    pub fn contain<I: Borrow<K>>(self, item: I) -> Self {
+    pub fn contain<I: Borrow<K>>(self, item: I) -> Should<'a, T, NoOpAssertionHook> {
         let item = item.borrow();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
-        assert!(
+        self.internal_assert(
             v.iter().any(|x| x.test_eq(&item)),
-            "{:?} did not contain {:?}",
-            v,
-            item,
+            format!("{:?} did not contain {:?}", v, item,),
         );
-        self
+        self.normalize()
     }
 
-    pub fn contain_sequence<L: Borrow<K>, I: IntoIterator<Item=L>>(self, items: I) -> Self {
+    pub fn contain_sequence<L: Borrow<K>, I: IntoIterator<Item = L>>(
+        self,
+        items: I,
+    ) -> Should<'a, T, NoOpAssertionHook> {
         let sequence = items.into_iter().collect::<Vec<L>>();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
-        assert!(
+        self.internal_assert(
             contains_sequence(&sequence, &v),
-            "{:?} does not contain the sequence {:?}",
-            v,
-            sequence.iter().map(|x| x.borrow()).collect::<Vec<&K>>()
+            format!(
+                "{:?} does not contain the sequence {:?}",
+                v,
+                sequence.iter().map(|x| x.borrow()).collect::<Vec<&K>>()
+            ),
         );
-        self
+        self.normalize()
     }
 
-    pub fn contains<I: Fn(&K) -> bool>(self, predicate: I) -> Self {
+    pub fn contains<I: Fn(&K) -> bool>(self, predicate: I) -> Should<'a, T, NoOpAssertionHook> {
         let v = self.inner.into_iter().collect::<Vec<&K>>();
-        assert!(
+        self.internal_assert(
             v.iter().map(|x| *x).any(predicate),
-            "{:?} did not fufill the predicate",
-            v
+            format!("{:?} did not fufill the predicate", v),
         );
-        self
-    }
-}
-
-impl<'a, T, K> ShouldNot<'a, T>
-    where
-        &'a T: IntoIterator<Item=&'a K>,
-        T: Debug,
-        T: Shoulda,
-        K: Debug,
-        K: Shoulda,
-        K: 'a,
-{
-    pub fn contain<I: Borrow<K>>(self, item: I) -> Should<'a, T> {
-        let item = item.borrow();
-        let v = self.inner.into_iter().collect::<Vec<&K>>();
-        assert!(
-            !v.iter().any(|x| x.test_eq(&item)),
-            "{:?} did contain {:?}",
-            v,
-            item,
-        );
-        self.not()
-    }
-
-    pub fn contain_sequence<L: Borrow<K>, I: IntoIterator<Item=L>>(self, items: I) -> Should<'a, T> {
-        let sequence = items.into_iter().collect::<Vec<L>>();
-        let v = self.inner.into_iter().collect::<Vec<&K>>();
-        assert!(
-            !contains_sequence(&sequence, &v),
-            "{:?} does contain the sequence {:?}",
-            v,
-            sequence.iter().map(|x| x.borrow()).collect::<Vec<&K>>()
-        );
-        self.not()
-    }
-
-    pub fn contains<I: Fn(&K) -> bool>(self, predicate: I) -> Should<'a, T> {
-        let v = self.inner.into_iter().collect::<Vec<&K>>();
-        assert!(
-            !v.iter().map(|x| *x).any(predicate),
-            "{:?} did fufill the predicate",
-            v
-        );
-        self.not()
+        self.normalize()
     }
 }
 
