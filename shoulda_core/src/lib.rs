@@ -32,11 +32,13 @@ where
     pub(crate) fn internal_assert(&self, initial: bool, message: String) {
         assert!(Hook::run(initial), "{}{}", Hook::message_prefix(), message);
     }
-    pub(crate) fn change_hook<T: AssertionHook>(self) -> Should<'a, Inner, T> {
+    pub(crate) fn change_optional_generics<T: AssertionHook, L: FloatDiffProvider>(
+        self,
+    ) -> Should<'a, Inner, T, L> {
         Should::new(self.inner)
     }
-    pub(crate) fn normalize(self) -> Should<'a, Inner, NoOpAssertionHook> {
-        self.change_hook()
+    pub(crate) fn normalize(self) -> Should<'a, Inner, NoOpAssertionHook, FloatDiff> {
+        self.change_optional_generics()
     }
     pub(crate) fn new(inner: &'a Inner) -> Self {
         Self {
@@ -72,21 +74,23 @@ where
     }
 }
 
-impl<'a, Inner> Should<'a, Inner, NoOpAssertionHook>
+impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
 where
     Inner: Shoulda,
+    FloatDiff: FloatDiffProvider,
 {
-    pub fn not(self) -> Should<'a, Inner, NotAssertionHook> {
-        self.change_hook()
+    pub fn not(self) -> Should<'a, Inner, NotAssertionHook, FloatDiff> {
+        self.change_optional_generics()
     }
 }
 
-impl<'a, Inner> Should<'a, Inner, NotAssertionHook>
+impl<'a, Inner, FloatDiff> Should<'a, Inner, NotAssertionHook, FloatDiff>
 where
     Inner: Shoulda,
+    FloatDiff: FloatDiffProvider,
 {
-    pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook> {
-        self.change_hook()
+    pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook, FloatDiff> {
+        self.change_optional_generics()
     }
 }
 

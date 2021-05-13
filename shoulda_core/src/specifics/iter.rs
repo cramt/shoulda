@@ -51,7 +51,7 @@ where
     Hook: AssertionHook,
     FloatDiff: FloatDiffProvider,
 {
-    pub fn contain<I: Borrow<K>>(self, item: I) -> Should<'a, T, NoOpAssertionHook> {
+    pub fn contain<I: Borrow<K>>(self, item: I) -> Should<'a, T, NoOpAssertionHook, FloatDiff> {
         let item = item.borrow();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
@@ -64,7 +64,7 @@ where
     pub fn contain_sequence<L: Borrow<K>, I: IntoIterator<Item = L>>(
         self,
         items: I,
-    ) -> Should<'a, T, NoOpAssertionHook> {
+    ) -> Should<'a, T, NoOpAssertionHook, FloatDiff> {
         let sequence = items.into_iter().collect::<Vec<L>>();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
@@ -78,7 +78,10 @@ where
         self.normalize()
     }
 
-    pub fn contains<I: Fn(&K) -> bool>(self, predicate: I) -> Should<'a, T, NoOpAssertionHook> {
+    pub fn contains<I: Fn(&K) -> bool>(
+        self,
+        predicate: I,
+    ) -> Should<'a, T, NoOpAssertionHook, FloatDiff> {
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
             v.iter().map(|x| *x).any(predicate),
