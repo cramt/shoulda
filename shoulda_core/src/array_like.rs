@@ -1,3 +1,4 @@
+use crate::float_diff_provider::FloatDiffProvider;
 use crate::Shoulda;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
@@ -11,8 +12,10 @@ macro_rules! zip_all_test_eq_assertable_impl {
             T: Debug,
             T: Shoulda,
         {
-            fn test_eq(&self, other: &Self) -> bool {
-                self.iter().zip(other.iter()).all(|(a, b)| a.test_eq(b))
+            fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+                self.iter()
+                    .zip(other.iter())
+                    .all(|(a, b)| a.test_eq::<FloatDiff>(b))
             }
         }
     };
@@ -32,11 +35,14 @@ where
     K: Debug,
     K: Shoulda,
 {
-    fn test_eq(&self, other: &Self) -> bool {
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
         self.len() == other.len()
-            && self
-                .keys()
-                .all(|x| other.get(x).map(|v| v.test_eq(&self[x])).unwrap_or(false))
+            && self.keys().all(|x| {
+                other
+                    .get(x)
+                    .map(|v| v.test_eq::<FloatDiff>(&self[x]))
+                    .unwrap_or(false)
+            })
     }
 }
 
@@ -47,7 +53,8 @@ where
     T: Eq,
     T: Hash,
 {
-    fn test_eq(&self, other: &Self) -> bool {
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        //TODO: make not dependant on Eq
         self.iter().all(|x| other.contains(x))
     }
 }
@@ -57,8 +64,8 @@ where
     T: Debug,
     T: Shoulda,
 {
-    fn test_eq(&self, other: &Self) -> bool {
-        self.start.test_eq(&other.start) && self.end.test_eq(&other.end)
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.start.test_eq::<FloatDiff>(&other.start) && self.end.test_eq::<FloatDiff>(&other.end)
     }
 }
 
@@ -67,7 +74,8 @@ where
     T: Debug,
     T: Shoulda,
 {
-    fn test_eq(&self, other: &Self) -> bool {
-        self.start().test_eq(other.start()) && self.end().test_eq(other.end())
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.start().test_eq::<FloatDiff>(other.start())
+            && self.end().test_eq::<FloatDiff>(other.end())
     }
 }

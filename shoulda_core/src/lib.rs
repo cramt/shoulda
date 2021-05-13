@@ -1,26 +1,33 @@
 pub mod array_like;
 pub mod assertion_hook;
 pub mod empty_types;
+pub mod float_diff_provider;
 pub mod specifics;
 #[cfg(test)]
 mod tests;
 pub mod wrapper_types;
 
 use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook};
-use once_cell::sync::Lazy;
+use crate::float_diff_provider::{EnvFloatDiffProvider, FloatDiffProvider};
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::ops::Deref;
 
-pub struct Should<'a, Inner, Hook: AssertionHook = NoOpAssertionHook> {
+pub struct Should<
+    'a,
+    Inner,
+    Hook: AssertionHook = NoOpAssertionHook,
+    FloatDiff: FloatDiffProvider = EnvFloatDiffProvider,
+> {
     inner: &'a Inner,
     hook: PhantomData<Hook>,
+    float_diff: PhantomData<FloatDiff>,
 }
 
-impl<'a, Inner, Hook> Should<'a, Inner, Hook>
+impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
 where
     Hook: AssertionHook,
+    FloatDiff: FloatDiffProvider,
 {
     pub(crate) fn internal_assert(&self, initial: bool, message: String) {
         assert!(Hook::run(initial), "{}{}", Hook::message_prefix(), message);
@@ -35,19 +42,21 @@ where
         Self {
             inner,
             hook: Default::default(),
+            float_diff: Default::default(),
         }
     }
 }
 
-impl<'a, Inner, Hook> Should<'a, Inner, Hook>
+impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
 where
     Inner: Shoulda,
     Hook: AssertionHook,
+    FloatDiff: FloatDiffProvider,
 {
     pub fn eq<K: Borrow<Inner>>(self, other: K) -> Self {
         let other = other.borrow();
         self.internal_assert(
-            self.inner.test_eq(other),
+            self.inner.test_eq::<FloatDiff>(other),
             format!("expected = {:?}, actual = {:?}", &self.inner, other),
         );
         self
@@ -82,7 +91,7 @@ where
 }
 
 pub trait Shoulda: Debug {
-    fn test_eq(&self, other: &Self) -> bool;
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool;
     fn should(&self) -> Should<Self>
     where
         Self: Sized,
@@ -94,24 +103,18 @@ pub trait Shoulda: Debug {
 macro_rules! eq_assertable_impl {
     ($x:ty) => {
         impl Shoulda for $x {
-            fn test_eq(&self, other: &Self) -> bool {
+            fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
                 self.eq(other)
             }
         }
     };
 }
 
-static SHOULDA_FLOAT_DIFF_MODE: Lazy<f64> = Lazy::new(|| {
-    option_env!("SHOULDA_FLOAT_DIFF_MODE")
-        .map(|x| x.parse().unwrap())
-        .unwrap_or(0.0001)
-});
-
 macro_rules! float_assertable_impl {
     ($x:ty) => {
         impl Shoulda for $x {
-            fn test_eq(&self, other: &Self) -> bool {
-                (self - other).abs() < (*SHOULDA_FLOAT_DIFF_MODE.deref() as $x)
+            fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+                (self - other).abs() < (FloatDiff::diff() as $x)
             }
         }
     };
@@ -140,7 +143,7 @@ impl<T> Shoulda for &T
 where
     T: Shoulda,
 {
-    fn test_eq(&self, other: &Self) -> bool {
-        T::test_eq(self, other)
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        T::test_eq::<FloatDiff>(self, other)
     }
 }

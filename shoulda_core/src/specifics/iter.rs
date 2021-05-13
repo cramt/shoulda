@@ -1,9 +1,13 @@
 use crate::assertion_hook::{AssertionHook, NoOpAssertionHook};
+use crate::float_diff_provider::FloatDiffProvider;
 use crate::{Should, Shoulda};
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
-fn contains_sequence<K: Shoulda, L: Borrow<K>>(sequence: &Vec<L>, v: &Vec<&K>) -> bool {
+fn contains_sequence<FloatDiff: FloatDiffProvider, K: Shoulda, L: Borrow<K>>(
+    sequence: &Vec<L>,
+    v: &Vec<&K>,
+) -> bool {
     if sequence.is_empty() {
         return true;
     }
@@ -15,7 +19,7 @@ fn contains_sequence<K: Shoulda, L: Borrow<K>>(sequence: &Vec<L>, v: &Vec<&K>) -
             Some(v) => {
                 curr = match curr {
                     None => {
-                        if sequence.first().unwrap().borrow().test_eq(v) {
+                        if sequence.first().unwrap().borrow().test_eq::<FloatDiff>(v) {
                             Some(1)
                         } else {
                             None
@@ -25,7 +29,7 @@ fn contains_sequence<K: Shoulda, L: Borrow<K>>(sequence: &Vec<L>, v: &Vec<&K>) -
                         if curr == sequence.len() {
                             break true;
                         }
-                        if sequence[curr].borrow().test_eq(v) {
+                        if sequence[curr].borrow().test_eq::<FloatDiff>(v) {
                             Some(curr + 1)
                         } else {
                             None
@@ -37,7 +41,7 @@ fn contains_sequence<K: Shoulda, L: Borrow<K>>(sequence: &Vec<L>, v: &Vec<&K>) -
     } || (curr.is_some() && curr.unwrap() == sequence.len()))
 }
 
-impl<'a, T, K, Hook> Should<'a, T, Hook>
+impl<'a, T, K, Hook, FloatDiff> Should<'a, T, Hook, FloatDiff>
 where
     &'a T: IntoIterator<Item = &'a K>,
     T: Debug,
@@ -45,12 +49,13 @@ where
     K: Shoulda,
     K: 'a,
     Hook: AssertionHook,
+    FloatDiff: FloatDiffProvider,
 {
     pub fn contain<I: Borrow<K>>(self, item: I) -> Should<'a, T, NoOpAssertionHook> {
         let item = item.borrow();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
-            v.iter().any(|x| x.test_eq(&item)),
+            v.iter().any(|x| x.test_eq::<FloatDiff>(&item)),
             format!("{:?} did not contain {:?}", v, item,),
         );
         self.normalize()
@@ -63,7 +68,7 @@ where
         let sequence = items.into_iter().collect::<Vec<L>>();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
-            contains_sequence(&sequence, &v),
+            contains_sequence::<FloatDiff, _, _>(&sequence, &v),
             format!(
                 "{:?} does not contain the sequence {:?}",
                 v,

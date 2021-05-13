@@ -1,3 +1,4 @@
+use crate::float_diff_provider::FloatDiffProvider;
 use crate::Shoulda;
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -8,10 +9,10 @@ where
     K: Shoulda,
     K: Debug,
 {
-    fn test_eq(&self, other: &Self) -> bool {
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
         match (self, other) {
             (None, None) => true,
-            (Some(a), Some(b)) => a.test_eq(b),
+            (Some(a), Some(b)) => a.test_eq::<FloatDiff>(b),
             _ => false,
         }
     }
@@ -24,10 +25,10 @@ where
     K: Shoulda,
     K: Debug,
 {
-    fn test_eq(&self, other: &Self) -> bool {
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
         match (self, other) {
-            (Err(a), Err(b)) => a.test_eq(b),
-            (Ok(a), Ok(b)) => a.test_eq(b),
+            (Err(a), Err(b)) => a.test_eq::<FloatDiff>(b),
+            (Ok(a), Ok(b)) => a.test_eq::<FloatDiff>(b),
             _ => false,
         }
     }
@@ -41,8 +42,8 @@ where
     <K as ToOwned>::Owned: Debug,
     K: ?Sized,
 {
-    fn test_eq(&self, other: &Self) -> bool {
-        self.deref().test_eq(other.deref())
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.deref().test_eq::<FloatDiff>(other.deref())
     }
 }
 
@@ -51,7 +52,7 @@ where
     T: Shoulda,
     T: ?Sized,
 {
-    fn test_eq(&self, other: &Self) -> bool {
-        self.deref().test_eq(other.deref())
+    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.deref().test_eq::<FloatDiff>(other.deref())
     }
 }
