@@ -122,6 +122,10 @@ pub trait Shoulda: Debug {
     }
 }
 
+pub fn expect<T: Shoulda>(t: &T) -> Should<T> {
+    t.should()
+}
+
 macro_rules! eq_assertable_impl {
     ($x:ty) => {
         impl Shoulda for $x {

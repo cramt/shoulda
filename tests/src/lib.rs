@@ -199,4 +199,13 @@ mod tests {
             ]));
         }
     }
+
+    mod expect{
+        use shoulda::core::expect;
+
+        #[test]
+        fn expect_works(){
+            expect(&2).be().eq(2);
+        }
+    }
 }
