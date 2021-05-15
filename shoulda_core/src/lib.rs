@@ -2,16 +2,19 @@ pub mod array_like;
 pub mod assertion_hook;
 pub mod empty_types;
 pub mod float_diff_provider;
+pub mod should_result;
 pub mod specifics;
 #[cfg(test)]
 mod tests;
 pub mod wrapper_types;
 
-use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook};
+use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook, OrAssertionHook};
 use crate::float_diff_provider::{EnvFloatDiffProvider, FloatDiffProvider};
+use crate::should_result::ResultsContainer;
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::ops::DerefMut;
 
 pub struct Should<
     'a,
@@ -19,6 +22,7 @@ pub struct Should<
     Hook: AssertionHook = NoOpAssertionHook,
     FloatDiff: FloatDiffProvider = EnvFloatDiffProvider,
 > {
+    results: ResultsContainer,
     inner: &'a Inner,
     hook: PhantomData<Hook>,
     float_diff: PhantomData<FloatDiff>,
@@ -29,19 +33,20 @@ where
     Hook: AssertionHook,
     FloatDiff: FloatDiffProvider,
 {
-    pub(crate) fn internal_assert(&self, initial: bool, message: String) {
-        assert!(Hook::run(initial), "{}{}", Hook::message_prefix(), message);
+    pub(crate) fn internal_assert(&mut self, initial: bool, message: String) {
+        Hook::create_result(initial, message, self.results.deref_mut())
     }
     pub(crate) fn change_optional_generics<T: AssertionHook, L: FloatDiffProvider>(
         self,
     ) -> Should<'a, Inner, T, L> {
-        Should::new(self.inner)
+        Should::new(self.inner, self.results)
     }
     pub(crate) fn normalize(self) -> Should<'a, Inner, NoOpAssertionHook, FloatDiff> {
         self.change_optional_generics()
     }
-    pub(crate) fn new(inner: &'a Inner) -> Self {
+    pub(crate) fn new(inner: &'a Inner, results: ResultsContainer) -> Self {
         Self {
+            results,
             inner,
             hook: Default::default(),
             float_diff: Default::default(),
@@ -55,7 +60,7 @@ where
     Hook: AssertionHook,
     FloatDiff: FloatDiffProvider,
 {
-    pub fn eq<K: Borrow<Inner>>(self, other: K) -> Self {
+    pub fn eq<K: Borrow<Inner>>(mut self, other: K) -> Self {
         let other = other.borrow();
         self.internal_assert(
             self.inner.test_eq::<FloatDiff>(other),
@@ -72,7 +77,7 @@ where
     pub fn and(self) -> Self {
         self
     }
-    pub fn float_diff<T: FloatDiffProvider>(self) -> Should<'a, Inner, Hook, T>{
+    pub fn float_diff<T: FloatDiffProvider>(self) -> Should<'a, Inner, Hook, T> {
         self.change_optional_generics()
     }
 }
@@ -83,6 +88,16 @@ where
     FloatDiff: FloatDiffProvider,
 {
     pub fn not(self) -> Should<'a, Inner, NotAssertionHook, FloatDiff> {
+        self.change_optional_generics()
+    }
+}
+
+impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
+where
+    Inner: Shoulda,
+    FloatDiff: FloatDiffProvider,
+{
+    pub fn or(self) -> Should<'a, Inner, OrAssertionHook, FloatDiff> {
         self.change_optional_generics()
     }
 }
@@ -103,7 +118,7 @@ pub trait Shoulda: Debug {
     where
         Self: Sized,
     {
-        Should::new(self)
+        Should::new(self, ResultsContainer::default())
     }
 }
 
