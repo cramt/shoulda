@@ -72,6 +72,9 @@ where
     pub fn and(self) -> Self {
         self
     }
+    pub fn float_diff<T: FloatDiffProvider>(self) -> Should<'a, Inner, Hook, T>{
+        self.change_optional_generics()
+    }
 }
 
 impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>

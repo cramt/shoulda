@@ -1,5 +1,6 @@
 use crate::Shoulda;
 use std::borrow::Cow;
+use crate::float_diff_provider::ConstFloatDiffProvider;
 
 #[test]
 fn vec_cow_i32() {
@@ -20,13 +21,8 @@ fn contains() {
 }
 
 #[test]
-fn something_really_important() {
-    let expected = String::from("thingy");
-    expected.should().be().equal(format!("{}ingy", "th"));
-}
-
-#[test]
-fn is_math_real() {
-    let expected = 4;
-    expected.should().be().equal(2 + 2);
+fn float_diff_changes(){
+    //u64 rep of 0.1 f64
+    const N: u64 = 4591870180066957722;
+    1f64.should().float_diff::<ConstFloatDiffProvider<N>>().eq(1.09f64);
 }
