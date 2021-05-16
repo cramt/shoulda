@@ -7,7 +7,7 @@ license = "MIT"
 description = "derive macro for test assertions"
 homepage = "https://github.com/cramt/shoulda"
 repository = "https://github.com/cramt/shoulda"
-documentation = "https://github.com/cramt/shoulda"
+documentation = "https://docs.rs/shoulda_core/0.1.2/shoulda_core/index.html"
 keywords = ["test", "BDD", "TDD", "assertion"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
