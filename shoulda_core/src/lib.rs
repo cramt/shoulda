@@ -29,9 +29,9 @@ pub struct Should<
 }
 
 impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
-where
-    Hook: AssertionHook,
-    FloatDiff: FloatDiffProvider,
+    where
+        Hook: AssertionHook,
+        FloatDiff: FloatDiffProvider,
 {
     pub(crate) fn internal_assert(&mut self, initial: bool, message: String) {
         Hook::create_result(initial, message, self.results.deref_mut())
@@ -55,10 +55,10 @@ where
 }
 
 impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
-where
-    Inner: Shoulda,
-    Hook: AssertionHook,
-    FloatDiff: FloatDiffProvider,
+    where
+        Inner: Shoulda,
+        Hook: AssertionHook,
+        FloatDiff: FloatDiffProvider,
 {
     pub fn eq<K: Borrow<Inner>>(mut self, other: K) -> Self {
         let other = other.borrow();
@@ -83,9 +83,9 @@ where
 }
 
 impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
-where
-    Inner: Shoulda,
-    FloatDiff: FloatDiffProvider,
+    where
+        Inner: Shoulda,
+        FloatDiff: FloatDiffProvider,
 {
     pub fn not(self) -> Should<'a, Inner, NotAssertionHook, FloatDiff> {
         self.change_optional_generics()
@@ -93,9 +93,9 @@ where
 }
 
 impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
-where
-    Inner: Shoulda,
-    FloatDiff: FloatDiffProvider,
+    where
+        Inner: Shoulda,
+        FloatDiff: FloatDiffProvider,
 {
     pub fn or(self) -> Should<'a, Inner, OrAssertionHook, FloatDiff> {
         self.change_optional_generics()
@@ -103,9 +103,9 @@ where
 }
 
 impl<'a, Inner, FloatDiff> Should<'a, Inner, NotAssertionHook, FloatDiff>
-where
-    Inner: Shoulda,
-    FloatDiff: FloatDiffProvider,
+    where
+        Inner: Shoulda,
+        FloatDiff: FloatDiffProvider,
 {
     pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook, FloatDiff> {
         self.change_optional_generics()
@@ -115,8 +115,8 @@ where
 pub trait Shoulda: Debug {
     fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool;
     fn should(&self) -> Should<Self>
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         Should::new(self, ResultsContainer::default())
     }
@@ -197,8 +197,8 @@ float_assertable_impl!(f32);
 float_assertable_impl!(f64);
 
 impl<T> Shoulda for &T
-where
-    T: Shoulda,
+    where
+        T: Shoulda,
 {
     fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
         T::test_eq::<FloatDiff>(self, other)
