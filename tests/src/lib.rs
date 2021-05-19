@@ -201,11 +201,11 @@ mod tests {
     }
 
     mod expect {
-        use shoulda::core::expect;
+        use shoulda::expect;
 
         #[test]
         fn expect_works() {
-            expect(&2).be().eq(2);
+            expect!(2).to().be().eq(2);
         }
     }
 

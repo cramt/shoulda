@@ -53,10 +53,10 @@ impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
     }
     pub fn panic_with<Expr: Panicable<'a, Inner>, S: AsRef<str>>(mut self, e: Expr, message: S) -> Self {
         let (result, assert_message) = e.run(&self.inner);
+        self.internal_assert(result.is_some(), format!("{} didnt panic", assert_message));
         match result {
             None => {}
             Some(x) => {
-                self.internal_assert(true, format!("{} didnt panic", assert_message));
                 let actual_message = x.downcast_ref::<String>().unwrap().as_str();
                 self.internal_assert(actual_message.test_eq::<FloatDiff>(message.as_ref()), format!("{} paniced with output {}, {} was expected", assert_message, actual_message, message.as_ref()))
             }
