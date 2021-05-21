@@ -10,11 +10,16 @@ repository = "https://github.com/cramt/shoulda"
 documentation = "https://docs.rs/shoulda_core/0.1.2/shoulda_core/index.html"
 keywords = ["test", "BDD", "TDD", "assertion"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = ["fmt"]
+fmt = ["shoulda_macro/fmt"]
 
 [dependencies]
-shoulda_macro = { path = "./shoulda_macro", version = "0.1.5" }
-shoulda_core = { path = "./shoulda_core", version = "0.1.5" }
+shoulda_macro = { path = "./shoulda_macro", version = "0.1.6" }
+shoulda_core = { path = "./shoulda_core", version = "0.1.6" }
 
 [workspace]
 members = ["shoulda_core", "shoulda_macro", "tests"]
+
+[package.metadata.docs.rs]
+no-default-features = true

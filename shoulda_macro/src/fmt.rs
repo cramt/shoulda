@@ -1,9 +1,15 @@
+#[cfg(fmt)]
 use ::rustfmt::config::{Config, WriteMode};
+#[cfg(fmt)]
 use ::rustfmt::format_input;
+#[cfg(fmt)]
 use ::rustfmt::Input::Text;
+#[cfg(fmt)]
 use std::collections::VecDeque;
+#[cfg(fmt)]
 use std::io::BufWriter;
 
+#[cfg(fmt)]
 pub fn format(s: String) -> String {
     let mut out = BufWriter::new(Vec::new());
     let mut config = Config::default();
@@ -15,4 +21,8 @@ pub fn format(s: String) -> String {
     out.pop_back();
     let out: String = out.into_iter().collect::<Vec<&str>>().join("\r\n");
     out.trim().to_string()
+}
+#[cfg(not(fmt))]
+pub fn format(s: String) -> String {
+    s
 }
