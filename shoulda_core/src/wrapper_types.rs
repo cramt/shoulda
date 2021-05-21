@@ -1,117 +1,117 @@
 use crate::float_diff_provider::FloatDiffProvider;
-use crate::Shoulda;
-use std::borrow::{Cow, Borrow};
-use std::fmt::Debug;
-use std::ops::Deref;
+use crate::ShouldaEqual;
+use std::borrow::{Borrow, Cow};
 use std::cell::{Cell, RefCell};
+use std::fmt::Debug;
 use std::num::Wrapping;
+use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::Arc;
 
-impl<K> Shoulda for Option<K>
-    where
-        K: Shoulda,
-        K: Debug,
+impl<K> ShouldaEqual for Option<K>
+where
+    K: ShouldaEqual,
+    K: Debug,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
         match (self, other) {
             (None, None) => true,
-            (Some(a), Some(b)) => a.test_eq::<FloatDiff>(b),
+            (Some(a), Some(b)) => a.should_eq::<FloatDiff>(b),
             _ => false,
         }
     }
 }
 
-impl<L, K> Shoulda for Result<L, K>
-    where
-        L: Shoulda,
-        L: Debug,
-        K: Shoulda,
-        K: Debug,
+impl<L, K> ShouldaEqual for Result<L, K>
+where
+    L: ShouldaEqual,
+    L: Debug,
+    K: ShouldaEqual,
+    K: Debug,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
         match (self, other) {
-            (Err(a), Err(b)) => a.test_eq::<FloatDiff>(b),
-            (Ok(a), Ok(b)) => a.test_eq::<FloatDiff>(b),
+            (Err(a), Err(b)) => a.should_eq::<FloatDiff>(b),
+            (Ok(a), Ok(b)) => a.should_eq::<FloatDiff>(b),
             _ => false,
         }
     }
 }
 
-impl<K> Shoulda for Cow<'_, K>
-    where
-        K: Shoulda,
-        K: Debug,
-        K: ToOwned,
-        <K as ToOwned>::Owned: Debug,
-        K: ?Sized,
+impl<K> ShouldaEqual for Cow<'_, K>
+where
+    K: ShouldaEqual,
+    K: Debug,
+    K: ToOwned,
+    <K as ToOwned>::Owned: Debug,
+    K: ?Sized,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        self.deref().test_eq::<FloatDiff>(other.deref())
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.deref().should_eq::<FloatDiff>(other.deref())
     }
 }
 
-impl<T> Shoulda for Box<T>
-    where
-        T: Shoulda,
-        T: ?Sized,
+impl<T> ShouldaEqual for Box<T>
+where
+    T: ShouldaEqual,
+    T: ?Sized,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        self.deref().test_eq::<FloatDiff>(other.deref())
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.deref().should_eq::<FloatDiff>(other.deref())
     }
 }
 
-impl<T> Shoulda for Cell<T>
-    where
-        T: Shoulda,
-        T: ?Sized,
-        T: Debug,
-        T: Copy
+impl<T> ShouldaEqual for Cell<T>
+where
+    T: ShouldaEqual,
+    T: ?Sized,
+    T: Debug,
+    T: Copy,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        self.get().test_eq::<FloatDiff>(&other.borrow().get())
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.get().should_eq::<FloatDiff>(&other.borrow().get())
     }
 }
 
-impl<T> Shoulda for RefCell<T>
-    where
-        T: Shoulda,
-        T: ?Sized,
-        T: Debug,
+impl<T> ShouldaEqual for RefCell<T>
+where
+    T: ShouldaEqual,
+    T: ?Sized,
+    T: Debug,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        self.borrow().test_eq::<FloatDiff>(&*other.borrow())
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.borrow().should_eq::<FloatDiff>(&*other.borrow())
     }
 }
 
-impl<T> Shoulda for Wrapping<T>
-    where
-        T: Shoulda,
-        T: Debug,
+impl<T> ShouldaEqual for Wrapping<T>
+where
+    T: ShouldaEqual,
+    T: Debug,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        self.0.test_eq::<FloatDiff>(&other.0)
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        self.0.should_eq::<FloatDiff>(&other.0)
     }
 }
 
-impl<T> Shoulda for Rc<T>
-    where
-        T: Shoulda,
-        T: ?Sized,
-        T: Debug,
+impl<T> ShouldaEqual for Rc<T>
+where
+    T: ShouldaEqual,
+    T: ?Sized,
+    T: Debug,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        (**self).test_eq::<FloatDiff>(&**other)
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        (**self).should_eq::<FloatDiff>(&**other)
     }
 }
 
-impl<T> Shoulda for Arc<T>
-    where
-        T: Shoulda,
-        T: ?Sized,
-        T: Debug,
+impl<T> ShouldaEqual for Arc<T>
+where
+    T: ShouldaEqual,
+    T: ?Sized,
+    T: Debug,
 {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        (**self).test_eq::<FloatDiff>(&**other)
+    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+        (**self).should_eq::<FloatDiff>(&**other)
     }
 }

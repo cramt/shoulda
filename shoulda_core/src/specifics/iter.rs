@@ -1,10 +1,10 @@
 use crate::assertion_hook::{AssertionHook, NoOpAssertionHook};
 use crate::float_diff_provider::FloatDiffProvider;
-use crate::{Should, Shoulda};
+use crate::{Should, ShouldaEqual};
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
-fn contains_sequence<FloatDiff: FloatDiffProvider, K: Shoulda, L: Borrow<K>>(
+fn contains_sequence<FloatDiff: FloatDiffProvider, K: ShouldaEqual, L: Borrow<K>>(
     sequence: &Vec<L>,
     v: &Vec<&K>,
 ) -> bool {
@@ -19,7 +19,7 @@ fn contains_sequence<FloatDiff: FloatDiffProvider, K: Shoulda, L: Borrow<K>>(
             Some(v) => {
                 curr = match curr {
                     None => {
-                        if sequence.first().unwrap().borrow().test_eq::<FloatDiff>(v) {
+                        if sequence.first().unwrap().borrow().should_eq::<FloatDiff>(v) {
                             Some(1)
                         } else {
                             None
@@ -29,7 +29,7 @@ fn contains_sequence<FloatDiff: FloatDiffProvider, K: Shoulda, L: Borrow<K>>(
                         if curr == sequence.len() {
                             break true;
                         }
-                        if sequence[curr].borrow().test_eq::<FloatDiff>(v) {
+                        if sequence[curr].borrow().should_eq::<FloatDiff>(v) {
                             Some(curr + 1)
                         } else {
                             None
@@ -46,7 +46,7 @@ where
     &'a T: IntoIterator<Item = &'a K>,
     T: Debug,
     K: Debug,
-    K: Shoulda,
+    K: ShouldaEqual,
     K: 'a,
     Hook: AssertionHook,
     FloatDiff: FloatDiffProvider,
@@ -55,7 +55,7 @@ where
         let item = item.borrow();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
-            v.iter().any(|x| x.test_eq::<FloatDiff>(&item)),
+            v.iter().any(|x| x.should_eq::<FloatDiff>(&item)),
             format!("{:?} did not contain {:?}", v, item,),
         );
         self.normalize()

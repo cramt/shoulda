@@ -3,6 +3,8 @@ pub mod assertion_hook;
 pub mod empty_types;
 pub mod float_diff_provider;
 pub mod should_result;
+pub mod shoulda_equal;
+pub mod shoulda_of_type;
 pub mod specifics;
 #[cfg(test)]
 mod tests;
@@ -11,6 +13,7 @@ pub mod wrapper_types;
 use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook, OrAssertionHook};
 use crate::float_diff_provider::{EnvFloatDiffProvider, FloatDiffProvider};
 use crate::should_result::ResultsContainer;
+use crate::shoulda_equal::ShouldaEqual;
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -29,9 +32,9 @@ pub struct Should<
 }
 
 impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
-    where
-        Hook: AssertionHook,
-        FloatDiff: FloatDiffProvider,
+where
+    Hook: AssertionHook,
+    FloatDiff: FloatDiffProvider,
 {
     pub(crate) fn internal_assert(&mut self, initial: bool, message: String) {
         Hook::create_result(initial, message, self.results.deref_mut())
@@ -52,25 +55,7 @@ impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
             float_diff: Default::default(),
         }
     }
-}
 
-impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
-    where
-        Inner: Shoulda,
-        Hook: AssertionHook,
-        FloatDiff: FloatDiffProvider,
-{
-    pub fn eq<K: Borrow<Inner>>(mut self, other: K) -> Self {
-        let other = other.borrow();
-        self.internal_assert(
-            self.inner.test_eq::<FloatDiff>(other),
-            format!("expected = {:?}, actual = {:?}", &self.inner, other),
-        );
-        self
-    }
-    pub fn equal<K: Borrow<Inner>>(self, other: K) -> Self {
-        self.eq(other)
-    }
     pub fn be(self) -> Self {
         self
     }
@@ -82,10 +67,28 @@ impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
     }
 }
 
+impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
+where
+    Inner: ShouldaEqual + Debug,
+    Hook: AssertionHook,
+    FloatDiff: FloatDiffProvider,
+{
+    pub fn eq<K: Borrow<Inner>>(mut self, other: K) -> Self {
+        let other = other.borrow();
+        self.internal_assert(
+            self.inner.should_eq::<FloatDiff>(other),
+            format!("expected = {:?}, actual = {:?}", &self.inner, other),
+        );
+        self
+    }
+    pub fn equal<K: Borrow<Inner>>(self, other: K) -> Self {
+        self.eq(other)
+    }
+}
+
 impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
-    where
-        Inner: Shoulda,
-        FloatDiff: FloatDiffProvider,
+where
+    FloatDiff: FloatDiffProvider,
 {
     pub fn not(self) -> Should<'a, Inner, NotAssertionHook, FloatDiff> {
         self.change_optional_generics()
@@ -93,9 +96,8 @@ impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
 }
 
 impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
-    where
-        Inner: Shoulda,
-        FloatDiff: FloatDiffProvider,
+where
+    FloatDiff: FloatDiffProvider,
 {
     pub fn or(self) -> Should<'a, Inner, OrAssertionHook, FloatDiff> {
         self.change_optional_generics()
@@ -103,100 +105,21 @@ impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
 }
 
 impl<'a, Inner, FloatDiff> Should<'a, Inner, NotAssertionHook, FloatDiff>
-    where
-        Inner: Shoulda,
-        FloatDiff: FloatDiffProvider,
+where
+    FloatDiff: FloatDiffProvider,
 {
     pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook, FloatDiff> {
         self.change_optional_generics()
     }
 }
 
-pub trait Shoulda: Debug {
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool;
+pub trait Shoulda {
     fn should(&self) -> Should<Self>
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         Should::new(self, ResultsContainer::default())
     }
 }
 
-macro_rules! eq_assertable_impl {
-    ($x:ty) => {
-        impl Shoulda for $x {
-            fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-                self.eq(other)
-            }
-        }
-    };
-}
-
-macro_rules! float_assertable_impl {
-    ($x:ty) => {
-        impl Shoulda for $x {
-            fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-                (self - other).abs() < (FloatDiff::diff() as $x)
-            }
-        }
-    };
-}
-
-eq_assertable_impl!(String);
-eq_assertable_impl!(str);
-eq_assertable_impl!(std::ffi::CString);
-eq_assertable_impl!(std::ffi::CStr);
-eq_assertable_impl!(std::ffi::OsString);
-eq_assertable_impl!(std::ffi::OsStr);
-eq_assertable_impl!(std::fs::FileType);
-eq_assertable_impl!(std::fs::Permissions);
-eq_assertable_impl!(std::net::Ipv4Addr);
-eq_assertable_impl!(std::net::Ipv6Addr);
-eq_assertable_impl!(std::net::SocketAddrV4);
-eq_assertable_impl!(std::net::SocketAddrV6);
-eq_assertable_impl!(std::path::Path);
-eq_assertable_impl!(std::path::PathBuf);
-eq_assertable_impl!(std::thread::ThreadId);
-eq_assertable_impl!(std::time::Duration);
-eq_assertable_impl!(std::time::Instant);
-eq_assertable_impl!(std::time::SystemTime);
-
-
-eq_assertable_impl!(bool);
-eq_assertable_impl!(u8);
-eq_assertable_impl!(i8);
-eq_assertable_impl!(u16);
-eq_assertable_impl!(i16);
-eq_assertable_impl!(u32);
-eq_assertable_impl!(i32);
-eq_assertable_impl!(u64);
-eq_assertable_impl!(i64);
-eq_assertable_impl!(u128);
-eq_assertable_impl!(i128);
-eq_assertable_impl!(usize);
-eq_assertable_impl!(isize);
-
-eq_assertable_impl!(std::num::NonZeroU8);
-eq_assertable_impl!(std::num::NonZeroI8);
-eq_assertable_impl!(std::num::NonZeroU16);
-eq_assertable_impl!(std::num::NonZeroI16);
-eq_assertable_impl!(std::num::NonZeroU32);
-eq_assertable_impl!(std::num::NonZeroI32);
-eq_assertable_impl!(std::num::NonZeroU64);
-eq_assertable_impl!(std::num::NonZeroI64);
-eq_assertable_impl!(std::num::NonZeroU128);
-eq_assertable_impl!(std::num::NonZeroI128);
-eq_assertable_impl!(std::num::NonZeroUsize);
-eq_assertable_impl!(std::num::NonZeroIsize);
-
-float_assertable_impl!(f32);
-float_assertable_impl!(f64);
-
-impl<T> Shoulda for &T
-    where
-        T: Shoulda,
-{
-    fn test_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        T::test_eq::<FloatDiff>(self, other)
-    }
-}
+impl<T> Shoulda for T {}

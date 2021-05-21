@@ -97,12 +97,12 @@ mod tests {
                 x: 2,
                 things: vec![7],
             }
-                .should()
-                .eq(Struct {
-                    something: "a".to_string(),
-                    x: 2,
-                    things: vec![7],
-                });
+            .should()
+            .eq(Struct {
+                something: "a".to_string(),
+                x: 2,
+                things: vec![7],
+            });
         }
     }
 
@@ -191,12 +191,12 @@ mod tests {
                 Cow::Owned("b".to_string()),
                 Cow::Borrowed("c"),
             ])
-                .should()
-                .eq(Vecs(vec![
-                    Cow::Owned("a".to_string()),
-                    Cow::Borrowed("b"),
-                    Cow::Owned("c".to_string()),
-                ]));
+            .should()
+            .eq(Vecs(vec![
+                Cow::Owned("a".to_string()),
+                Cow::Borrowed("b"),
+                Cow::Owned("c".to_string()),
+            ]));
         }
     }
 
@@ -210,16 +210,19 @@ mod tests {
     }
 
     mod panic {
-        use shoulda::Shoulda;
         use shoulda::expr;
+        use shoulda::Shoulda;
 
         #[test]
         fn expr() {
-            ().should().panic_with(|_: &_| {
-                vec![1].should().panic(expr!(|a: &Vec<i32>| {
-                    let _ = &a[0];
-                }));
-            }, "|a: &Vec<i32>| { let _ = &a[0]; } didnt panic");
+            ().should().panic_with(
+                |_: &_| {
+                    vec![1].should().panic(expr!(|a: &Vec<i32>| {
+                        let _ = &a[0];
+                    }));
+                },
+                "|a: &Vec<i32>| { let _ = &a[0]; } didnt panic",
+            );
         }
     }
 }

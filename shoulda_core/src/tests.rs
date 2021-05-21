@@ -1,7 +1,7 @@
 use crate::float_diff_provider::ConstFloatDiffProvider;
 use crate::Shoulda;
+use std::any::Any;
 use std::borrow::Cow;
-use crate::specifics::panic::Expression;
 
 #[test]
 fn vec_cow_i32() {
@@ -71,10 +71,19 @@ fn operation_order_dependent() {
 
 #[test]
 fn panic_catching() {
-    Vec::<i32>::new().should().panic(|a: &Vec::<i32>| {
+    Vec::<i32>::new().should().panic(|a: &Vec<i32>| {
         let _ = &a[0];
     });
-    vec![0].should().not().panic(|a: &Vec::<i32>| {
+    vec![0].should().not().panic(|a: &Vec<i32>| {
         let _ = &a[0];
     });
+}
+
+#[test]
+fn of_type() {
+    let a: Box<dyn Any> = Box::new(1);
+    a.should().be().of_type::<i32>();
+
+    let a: Box<dyn Any> = Box::new(String::new());
+    a.should().be().of_type::<String>();
 }

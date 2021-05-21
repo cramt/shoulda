@@ -1,15 +1,17 @@
 mod fmt;
 
+use crate::fmt::format;
 use quote::quote;
 use syn::__private::TokenStream2;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::fmt::format;
 
 #[proc_macro]
-pub fn expr(input: proc_macro::TokenStream) -> proc_macro::TokenStream{
+pub fn expr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = TokenStream2::from(input);
     let str_input = format(input.to_string());
-    proc_macro::TokenStream::from(quote! {::shoulda::core::specifics::panic::Expression::new(#input, #str_input.to_string())})
+    proc_macro::TokenStream::from(
+        quote! {::shoulda::core::specifics::panic::Expression::new(#input, #str_input.to_string())},
+    )
 }
 
 #[proc_macro_derive(Shoulda)]
@@ -24,7 +26,7 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 .map(|x| x.ident.as_ref().unwrap())
                 .map(|x| {
                     quote! {
-                        self.#x.test_eq::<FloatDiff>(&other.#x)
+                        self.#x.should_eq::<FloatDiff>(&other.#x)
                     }
                 })
                 .map(|x| x.to_string())
@@ -39,7 +41,7 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 .map(|(x, _)| x.to_string().parse::<TokenStream2>().unwrap())
                 .map(|x| {
                     quote! {
-                        self.#x.test_eq::<FloatDiff>(&other.#x)
+                        self.#x.should_eq::<FloatDiff>(&other.#x)
                     }
                 })
                 .map(|x| x.to_string())
@@ -62,7 +64,7 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     let size = x.fields.iter().enumerate().map(|x|format!("__{}", x.0)).collect::<Vec<String>>();
                     let a_var_args = format!("({})", size.iter().map(|x|format!("{}a", x)).collect::<Vec<String>>().join(","));
                     let b_var_args = format!("({})", size.iter().map(|x|format!("{}b", x)).collect::<Vec<String>>().join(","));
-                    let eval: String = size.iter().map(|x|format!("{0}a.test_eq::<FloatDiff>({0}b)", x)).collect::<Vec<String>>().join(" && ");
+                    let eval: String = size.iter().map(|x|format!("{0}a.should_eq::<FloatDiff>({0}b)", x)).collect::<Vec<String>>().join(" && ");
                     format!("({name}::{variant}{a_var_args}, {name}::{variant}{b_var_args}) => {eval}, ",
                             name = name, variant = variant, a_var_args = a_var_args, b_var_args = b_var_args, eval = eval)
                         .parse::<TokenStream2>()
@@ -85,8 +87,8 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     let expanded = quote! {
         #[cfg(test)]
-        impl#generics ::shoulda::Shoulda for #name#generics {
-            fn test_eq<FloatDiff: ::shoulda::core::float_diff_provider::FloatDiffProvider>(&self, other: &Self) -> bool {
+        impl#generics ::shoulda::core::shoulda_equal::ShouldaEqual for #name#generics {
+            fn should_eq<FloatDiff: ::shoulda::core::float_diff_provider::FloatDiffProvider>(&self, other: &Self) -> bool {
                 #body
             }
         }
