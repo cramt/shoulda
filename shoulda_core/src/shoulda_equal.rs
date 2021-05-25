@@ -1,13 +1,13 @@
-use crate::float_diff_provider::FloatDiffProvider;
+use crate::epsilon_provider::EpsilonProvider;
 
 pub trait ShouldaEqual {
-    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool;
+    fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool;
 }
 
 macro_rules! eq_assertable_impl {
     ($x:ty) => {
         impl ShouldaEqual for $x {
-            fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+            fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
                 self.eq(other)
             }
         }
@@ -17,8 +17,8 @@ macro_rules! eq_assertable_impl {
 macro_rules! float_assertable_impl {
     ($x:ty) => {
         impl ShouldaEqual for $x {
-            fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-                (self - other).abs() < (FloatDiff::diff() as $x)
+            fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
+                (self - other).abs() < (Epsilon::diff() as $x)
             }
         }
     };
@@ -77,7 +77,7 @@ impl<T> ShouldaEqual for &T
 where
     T: ShouldaEqual,
 {
-    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        T::should_eq::<FloatDiff>(self, other)
+    fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
+        T::should_eq::<Epsilon>(self, other)
     }
 }

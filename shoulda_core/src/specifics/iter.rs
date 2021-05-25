@@ -1,10 +1,10 @@
 use crate::assertion_hook::{AssertionHook, NoOpAssertionHook};
-use crate::float_diff_provider::FloatDiffProvider;
+use crate::epsilon_provider::EpsilonProvider;
 use crate::{Should, ShouldaEqual};
 use std::borrow::Borrow;
 use std::fmt::Debug;
 
-fn contains_sequence<FloatDiff: FloatDiffProvider, K: ShouldaEqual, L: Borrow<K>>(
+fn contains_sequence<Epsilon: EpsilonProvider, K: ShouldaEqual, L: Borrow<K>>(
     sequence: &Vec<L>,
     v: &Vec<&K>,
 ) -> bool {
@@ -19,7 +19,7 @@ fn contains_sequence<FloatDiff: FloatDiffProvider, K: ShouldaEqual, L: Borrow<K>
             Some(v) => {
                 curr = match curr {
                     None => {
-                        if sequence.first().unwrap().borrow().should_eq::<FloatDiff>(v) {
+                        if sequence.first().unwrap().borrow().should_eq::<Epsilon>(v) {
                             Some(1)
                         } else {
                             None
@@ -29,7 +29,7 @@ fn contains_sequence<FloatDiff: FloatDiffProvider, K: ShouldaEqual, L: Borrow<K>
                         if curr == sequence.len() {
                             break true;
                         }
-                        if sequence[curr].borrow().should_eq::<FloatDiff>(v) {
+                        if sequence[curr].borrow().should_eq::<Epsilon>(v) {
                             Some(curr + 1)
                         } else {
                             None
@@ -41,7 +41,7 @@ fn contains_sequence<FloatDiff: FloatDiffProvider, K: ShouldaEqual, L: Borrow<K>
     } || (curr.is_some() && curr.unwrap() == sequence.len()))
 }
 
-impl<'a, T, K, Hook, FloatDiff> Should<'a, T, Hook, FloatDiff>
+impl<'a, T, K, Hook, Epsilon> Should<'a, T, Hook, Epsilon>
 where
     &'a T: IntoIterator<Item = &'a K>,
     T: Debug,
@@ -49,13 +49,13 @@ where
     K: ShouldaEqual,
     K: 'a,
     Hook: AssertionHook,
-    FloatDiff: FloatDiffProvider,
+    Epsilon: EpsilonProvider,
 {
-    pub fn contain<I: Borrow<K>>(mut self, item: I) -> Should<'a, T, NoOpAssertionHook, FloatDiff> {
+    pub fn contain<I: Borrow<K>>(mut self, item: I) -> Should<'a, T, NoOpAssertionHook, Epsilon> {
         let item = item.borrow();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
-            v.iter().any(|x| x.should_eq::<FloatDiff>(&item)),
+            v.iter().any(|x| x.should_eq::<Epsilon>(&item)),
             format!("{:?} did not contain {:?}", v, item,),
         );
         self.normalize()
@@ -64,11 +64,11 @@ where
     pub fn contain_sequence<L: Borrow<K>, I: IntoIterator<Item = L>>(
         mut self,
         items: I,
-    ) -> Should<'a, T, NoOpAssertionHook, FloatDiff> {
+    ) -> Should<'a, T, NoOpAssertionHook, Epsilon> {
         let sequence = items.into_iter().collect::<Vec<L>>();
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
-            contains_sequence::<FloatDiff, _, _>(&sequence, &v),
+            contains_sequence::<Epsilon, _, _>(&sequence, &v),
             format!(
                 "{:?} does not contain the sequence {:?}",
                 v,
@@ -81,7 +81,7 @@ where
     pub fn contains<I: Fn(&K) -> bool>(
         mut self,
         predicate: I,
-    ) -> Should<'a, T, NoOpAssertionHook, FloatDiff> {
+    ) -> Should<'a, T, NoOpAssertionHook, Epsilon> {
         let v = self.inner.into_iter().collect::<Vec<&K>>();
         self.internal_assert(
             v.iter().map(|x| *x).any(predicate),

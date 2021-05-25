@@ -59,6 +59,6 @@ fn test() {
 for more derive examples take a look at the tests within tests/src/
 
 ## Float equality
-For float equality this library checks wether or not the floats are within a specific threshold of eachother, that threshold i current defined as the envorimental variable `SHOULDA_FLOAT_DIFF_MODE` or if its not defined its defaulted to 0.0001.
+For float equality this library checks wether or not the floats are within a specific threshold of eachother, that threshold i current defined as the envorimental variable `SHOULDA_EPSILON` or if its not defined its defaulted to 0.0001.
 
 This also happens when struct which Shoulda is applied to through the derive macro contains floating point numbers.

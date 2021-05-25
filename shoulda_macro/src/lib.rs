@@ -26,7 +26,7 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 .map(|x| x.ident.as_ref().unwrap())
                 .map(|x| {
                     quote! {
-                        self.#x.should_eq::<FloatDiff>(&other.#x)
+                        self.#x.should_eq::<Epsilon>(&other.#x)
                     }
                 })
                 .map(|x| x.to_string())
@@ -41,7 +41,7 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 .map(|(x, _)| x.to_string().parse::<TokenStream2>().unwrap())
                 .map(|x| {
                     quote! {
-                        self.#x.should_eq::<FloatDiff>(&other.#x)
+                        self.#x.should_eq::<Epsilon>(&other.#x)
                     }
                 })
                 .map(|x| x.to_string())
@@ -64,7 +64,7 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     let size = x.fields.iter().enumerate().map(|x|format!("__{}", x.0)).collect::<Vec<String>>();
                     let a_var_args = format!("({})", size.iter().map(|x|format!("{}a", x)).collect::<Vec<String>>().join(","));
                     let b_var_args = format!("({})", size.iter().map(|x|format!("{}b", x)).collect::<Vec<String>>().join(","));
-                    let eval: String = size.iter().map(|x|format!("{0}a.should_eq::<FloatDiff>({0}b)", x)).collect::<Vec<String>>().join(" && ");
+                    let eval: String = size.iter().map(|x|format!("{0}a.should_eq::<Epsilon>({0}b)", x)).collect::<Vec<String>>().join(" && ");
                     format!("({name}::{variant}{a_var_args}, {name}::{variant}{b_var_args}) => {eval}, ",
                             name = name, variant = variant, a_var_args = a_var_args, b_var_args = b_var_args, eval = eval)
                         .parse::<TokenStream2>()
@@ -88,7 +88,7 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let expanded = quote! {
         #[cfg(test)]
         impl#generics ::shoulda::core::shoulda_equal::ShouldaEqual for #name#generics {
-            fn should_eq<FloatDiff: ::shoulda::core::float_diff_provider::FloatDiffProvider>(&self, other: &Self) -> bool {
+            fn should_eq<Epsilon: ::shoulda::core::epsilon_provider::EpsilonProvider>(&self, other: &Self) -> bool {
                 #body
             }
         }

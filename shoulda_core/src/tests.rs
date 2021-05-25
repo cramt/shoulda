@@ -1,4 +1,4 @@
-use crate::float_diff_provider::ConstFloatDiffProvider;
+use crate::epsilon_provider::ConstEpsilonProvider;
 use crate::Shoulda;
 use std::any::Any;
 use std::borrow::Cow;
@@ -26,7 +26,7 @@ fn float_diff_changes() {
     //u64 rep of 0.1 f64
     const N: u64 = 4591870180066957722;
     1f64.should()
-        .float_diff::<ConstFloatDiffProvider<N>>()
+        .float_diff::<ConstEpsilonProvider<N>>()
         .eq(1.09f64);
 }
 

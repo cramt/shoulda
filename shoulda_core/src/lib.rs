@@ -1,7 +1,7 @@
 pub mod array_like;
 pub mod assertion_hook;
 pub mod empty_types;
-pub mod float_diff_provider;
+pub mod epsilon_provider;
 pub mod should_result;
 pub mod shoulda_equal;
 pub mod shoulda_of_type;
@@ -11,7 +11,7 @@ mod tests;
 pub mod wrapper_types;
 
 use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook, OrAssertionHook};
-use crate::float_diff_provider::{EnvFloatDiffProvider, FloatDiffProvider};
+use crate::epsilon_provider::{EnvEpsilonProvider, EpsilonProvider};
 use crate::should_result::ResultsContainer;
 use crate::shoulda_equal::ShouldaEqual;
 use std::borrow::Borrow;
@@ -23,28 +23,28 @@ pub struct Should<
     'a,
     Inner,
     Hook: AssertionHook = NoOpAssertionHook,
-    FloatDiff: FloatDiffProvider = EnvFloatDiffProvider,
+    Epsilon: EpsilonProvider = EnvEpsilonProvider,
 > {
     results: ResultsContainer,
     inner: &'a Inner,
     hook: PhantomData<Hook>,
-    float_diff: PhantomData<FloatDiff>,
+    float_diff: PhantomData<Epsilon>,
 }
 
-impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
+impl<'a, Inner, Hook, Epsilon> Should<'a, Inner, Hook, Epsilon>
 where
     Hook: AssertionHook,
-    FloatDiff: FloatDiffProvider,
+    Epsilon: EpsilonProvider,
 {
     pub(crate) fn internal_assert(&mut self, initial: bool, message: String) {
         Hook::create_result(initial, message, self.results.deref_mut())
     }
-    pub(crate) fn change_optional_generics<T: AssertionHook, L: FloatDiffProvider>(
+    pub(crate) fn change_optional_generics<T: AssertionHook, L: EpsilonProvider>(
         self,
     ) -> Should<'a, Inner, T, L> {
         Should::new(self.inner, self.results)
     }
-    pub(crate) fn normalize(self) -> Should<'a, Inner, NoOpAssertionHook, FloatDiff> {
+    pub(crate) fn normalize(self) -> Should<'a, Inner, NoOpAssertionHook, Epsilon> {
         self.change_optional_generics()
     }
     pub(crate) fn new(inner: &'a Inner, results: ResultsContainer) -> Self {
@@ -62,21 +62,21 @@ where
     pub fn and(self) -> Self {
         self
     }
-    pub fn float_diff<T: FloatDiffProvider>(self) -> Should<'a, Inner, Hook, T> {
+    pub fn float_diff<T: EpsilonProvider>(self) -> Should<'a, Inner, Hook, T> {
         self.change_optional_generics()
     }
 }
 
-impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
+impl<'a, Inner, Hook, Epsilon> Should<'a, Inner, Hook, Epsilon>
 where
     Inner: ShouldaEqual + Debug,
     Hook: AssertionHook,
-    FloatDiff: FloatDiffProvider,
+    Epsilon: EpsilonProvider,
 {
     pub fn eq<K: Borrow<Inner>>(mut self, other: K) -> Self {
         let other = other.borrow();
         self.internal_assert(
-            self.inner.should_eq::<FloatDiff>(other),
+            self.inner.should_eq::<Epsilon>(other),
             format!("expected = {:?}, actual = {:?}", &self.inner, other),
         );
         self
@@ -86,29 +86,29 @@ where
     }
 }
 
-impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
+impl<'a, Inner, Epsilon> Should<'a, Inner, NoOpAssertionHook, Epsilon>
 where
-    FloatDiff: FloatDiffProvider,
+    Epsilon: EpsilonProvider,
 {
-    pub fn not(self) -> Should<'a, Inner, NotAssertionHook, FloatDiff> {
+    pub fn not(self) -> Should<'a, Inner, NotAssertionHook, Epsilon> {
         self.change_optional_generics()
     }
 }
 
-impl<'a, Inner, FloatDiff> Should<'a, Inner, NoOpAssertionHook, FloatDiff>
+impl<'a, Inner, Epsilon> Should<'a, Inner, NoOpAssertionHook, Epsilon>
 where
-    FloatDiff: FloatDiffProvider,
+    Epsilon: EpsilonProvider,
 {
-    pub fn or(self) -> Should<'a, Inner, OrAssertionHook, FloatDiff> {
+    pub fn or(self) -> Should<'a, Inner, OrAssertionHook, Epsilon> {
         self.change_optional_generics()
     }
 }
 
-impl<'a, Inner, FloatDiff> Should<'a, Inner, NotAssertionHook, FloatDiff>
+impl<'a, Inner, Epsilon> Should<'a, Inner, NotAssertionHook, Epsilon>
 where
-    FloatDiff: FloatDiffProvider,
+    Epsilon: EpsilonProvider,
 {
-    pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook, FloatDiff> {
+    pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook, Epsilon> {
         self.change_optional_generics()
     }
 }

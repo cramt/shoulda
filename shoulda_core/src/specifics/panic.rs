@@ -1,5 +1,5 @@
 use crate::assertion_hook::AssertionHook;
-use crate::float_diff_provider::FloatDiffProvider;
+use crate::epsilon_provider::EpsilonProvider;
 use crate::shoulda_equal::ShouldaEqual;
 use crate::Should;
 use std::any::Any;
@@ -46,12 +46,12 @@ impl<'a, T: RefUnwindSafe + Debug, F: FnOnce(&T) + UnwindSafe> Panicable<'a, T> 
     }
 }
 
-impl<'a, Inner, Hook, FloatDiff> Should<'a, Inner, Hook, FloatDiff>
+impl<'a, Inner, Hook, Epsilon> Should<'a, Inner, Hook, Epsilon>
 where
     Inner: Debug,
     Inner: RefUnwindSafe,
     Hook: AssertionHook,
-    FloatDiff: FloatDiffProvider,
+    Epsilon: EpsilonProvider,
 {
     pub fn panic<Expr: Panicable<'a, Inner>>(mut self, e: Expr) -> Self {
         let (result, message) = e.run(&self.inner);
@@ -70,7 +70,7 @@ where
             Some(x) => {
                 let actual_message = x.downcast_ref::<String>().unwrap().as_str();
                 self.internal_assert(
-                    actual_message.should_eq::<FloatDiff>(message.as_ref()),
+                    actual_message.should_eq::<Epsilon>(message.as_ref()),
                     format!(
                         "{} paniced with output {}, {} was expected",
                         assert_message,

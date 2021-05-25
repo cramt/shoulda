@@ -1,4 +1,4 @@
-use crate::float_diff_provider::FloatDiffProvider;
+use crate::epsilon_provider::EpsilonProvider;
 use crate::ShouldaEqual;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
@@ -12,10 +12,10 @@ macro_rules! zip_all_test_eq_assertable_impl {
             T: Debug,
             T: ShouldaEqual,
         {
-            fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+            fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
                 self.iter()
                     .zip(other.iter())
-                    .all(|(a, b)| a.should_eq::<FloatDiff>(b))
+                    .all(|(a, b)| a.should_eq::<Epsilon>(b))
             }
         }
     };
@@ -35,12 +35,12 @@ where
     K: Debug,
     K: ShouldaEqual,
 {
-    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+    fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
         self.len() == other.len()
             && self.keys().all(|x| {
                 other
                     .get(x)
-                    .map(|v| v.should_eq::<FloatDiff>(&self[x]))
+                    .map(|v| v.should_eq::<Epsilon>(&self[x]))
                     .unwrap_or(false)
             })
     }
@@ -53,7 +53,7 @@ where
     T: Eq,
     T: Hash,
 {
-    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
+    fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
         //TODO: make not dependant on Eq
         self.iter().all(|x| other.contains(x))
     }
@@ -64,9 +64,9 @@ where
     T: Debug,
     T: ShouldaEqual,
 {
-    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        self.start.should_eq::<FloatDiff>(&other.start)
-            && self.end.should_eq::<FloatDiff>(&other.end)
+    fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
+        self.start.should_eq::<Epsilon>(&other.start)
+            && self.end.should_eq::<Epsilon>(&other.end)
     }
 }
 
@@ -75,8 +75,8 @@ where
     T: Debug,
     T: ShouldaEqual,
 {
-    fn should_eq<FloatDiff: FloatDiffProvider>(&self, other: &Self) -> bool {
-        self.start().should_eq::<FloatDiff>(other.start())
-            && self.end().should_eq::<FloatDiff>(other.end())
+    fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
+        self.start().should_eq::<Epsilon>(other.start())
+            && self.end().should_eq::<Epsilon>(other.end())
     }
 }
