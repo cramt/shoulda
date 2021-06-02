@@ -1,21 +1,17 @@
-use once_cell::sync::Lazy;
-use std::ops::Deref;
+use const_env::from_env;
 
 pub trait EpsilonProvider {
     fn diff() -> f64;
 }
 
-static SHOULDA_EPSILON: Lazy<f64> = Lazy::new(|| {
-    option_env!("SHOULDA_EPSILON")
-        .map(|x| x.parse().unwrap())
-        .unwrap_or(0.0001)
-});
+#[from_env]
+const SHOULDA_EPSILON: f64 = 0.0001;
 
 pub struct EnvEpsilonProvider;
 
 impl EpsilonProvider for EnvEpsilonProvider {
     fn diff() -> f64 {
-        *SHOULDA_EPSILON.deref()
+        SHOULDA_EPSILON
     }
 }
 
