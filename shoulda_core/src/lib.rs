@@ -19,6 +19,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::DerefMut;
 
+/// A wrapper type around a borrowed value to assert things about it for testing
 pub struct Should<
     'a,
     Inner,
@@ -56,12 +57,17 @@ where
         }
     }
 
+    /// no-op, there to allow you to write english-like sentences
     pub fn be(self) -> Self {
         self
     }
+
+    /// no-op, there to allow you to write english-like sentences
     pub fn and(self) -> Self {
         self
     }
+
+    /// Changes the generic for which EpsilonProvider to use
     pub fn float_diff<T: EpsilonProvider>(self) -> Should<'a, Inner, Hook, T> {
         self.change_optional_generics()
     }
@@ -73,6 +79,7 @@ where
     Hook: AssertionHook,
     Epsilon: EpsilonProvider,
 {
+    /// Asserts equality
     pub fn eq<K: Borrow<Inner>>(mut self, other: K) -> Self {
         let other = other.borrow();
         self.internal_assert(
@@ -81,6 +88,8 @@ where
         );
         self
     }
+
+    /// alias for eq
     pub fn equal<K: Borrow<Inner>>(self, other: K) -> Self {
         self.eq(other)
     }
@@ -90,6 +99,7 @@ impl<'a, Inner, Epsilon> Should<'a, Inner, NoOpAssertionHook, Epsilon>
 where
     Epsilon: EpsilonProvider,
 {
+    /// Changes the assertion hook to not the next assertion
     pub fn not(self) -> Should<'a, Inner, NotAssertionHook, Epsilon> {
         self.change_optional_generics()
     }
@@ -99,6 +109,8 @@ impl<'a, Inner, Epsilon> Should<'a, Inner, NoOpAssertionHook, Epsilon>
 where
     Epsilon: EpsilonProvider,
 {
+    /// Changes the assertion hook to or the next assertion with the previous, in case of no
+    /// previous assertion this will be a no-op
     pub fn or(self) -> Should<'a, Inner, OrAssertionHook, Epsilon> {
         self.change_optional_generics()
     }
@@ -108,6 +120,7 @@ impl<'a, Inner, Epsilon> Should<'a, Inner, NotAssertionHook, Epsilon>
 where
     Epsilon: EpsilonProvider,
 {
+    /// Changes the assertion hook to not the next assertion
     pub fn not(self) -> Should<'a, Inner, NoOpAssertionHook, Epsilon> {
         self.change_optional_generics()
     }
