@@ -5,7 +5,7 @@ Shoulda is based on heavily [chai](https://www.chaijs.com/)'s `should` interface
 
 ---
 ```toml
-shoulda = { git = "https://github.com/cramt/shoulda.git", branch = "main"}
+shoulda = "0.1.9"
 ```
 
 ## std examples
@@ -15,13 +15,13 @@ use shoulda::Shoulda;
 
 #[test]
 fn something_really_important() {
-    let expected = String::from("thingy");
-    expected.should().be().equal(format!("{}ingy", "th"));
+	let expected = String::from("thingy");
+	expected.should().be().equal(format!("{}ingy", "th"));
 }
 #[test]
 fn is_math_real() {
-    let expected = 4;
-    expected.should().be().equal(2 + 2);
+	let expected = 4;
+	expected.should().be().equal(2 + 2);
 }
 ```
 
@@ -31,28 +31,48 @@ for more std examples take a look at the tests within shoulda_core/src/tests.rs
 Shoulda provides a derive macro which allows you to automatically implement Shoulda on all your core struct you wanna compare without requiring PartialEq.
 
 It does require Debug as a proper error message cant be generated without it
-```rust 
+```rust
 use shoulda::Shoulda;
 
 #[derive(Debug, Shoulda)]
 struct Person {
-    name: String,
-    has_toothbrush: bool,
+name: String,
+	      has_toothbrush: bool,
 }
 
 #[test]
 fn test() {
-    Person {
-        name: "Ronald".to_string(),
-        has_toothbrush: false,
-    }
-    .should()
-    .not()
-    .be()
-    .equal(Person {
-        name: "Ronald".to_string(),
-        has_toothbrush: true,
-    });
+	Person {
+name: "Ronald".to_string(),
+	      has_toothbrush: false,
+	}
+	.should()
+		.not()
+		.be()
+		.equal(Person {
+name: "Ronald".to_string(),
+has_toothbrush: true,
+});
+}
+```
+
+## expect syntax
+Shoulda also supports an expect alias instead of should
+```rust
+use shoulda::expect;
+
+#[test]
+fn test(){
+	expect!(your_super_cool_thing).to();
+}
+```
+is equivalent to
+```rust
+use shoulda::Shoulda;
+
+#[test]
+fn test(){
+	your_super_cool_thing.should();
 }
 ```
 

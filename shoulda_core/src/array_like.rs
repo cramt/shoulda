@@ -65,8 +65,7 @@ where
     T: ShouldaEqual,
 {
     fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
-        self.start.should_eq::<Epsilon>(&other.start)
-            && self.end.should_eq::<Epsilon>(&other.end)
+        self.start.should_eq::<Epsilon>(&other.start) && self.end.should_eq::<Epsilon>(&other.end)
     }
 }
 
