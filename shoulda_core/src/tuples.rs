@@ -6,6 +6,6 @@ use crate::{epsilon_provider::EpsilonProvider, shoulda_equal::ShouldaEqual};
 impl ShouldaEqual for Tuple {
     fn should_eq<Epsilon: EpsilonProvider>(&self, other: &Self) -> bool {
         let a = [for_tuples!(#( self.Tuple.should_eq::<Epsilon>(&other.Tuple)),*)];
-        a.iter().any(|x| *x)
+        a.iter().all(|x| *x)
     }
 }
