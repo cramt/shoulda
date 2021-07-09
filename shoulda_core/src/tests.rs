@@ -87,3 +87,11 @@ fn of_type() {
     let a: Box<dyn Any> = Box::new(String::new());
     a.should().be().of_type::<String>();
 }
+
+#[test]
+fn tuples() {
+    let a = ("hello".to_string(), "there".to_string());
+    a.should()
+        .be()
+        .eq(("hello".to_string(), "there".to_string()));
+}

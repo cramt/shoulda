@@ -9,6 +9,7 @@ pub mod specifics;
 #[cfg(test)]
 mod tests;
 pub mod wrapper_types;
+pub mod tuples;
 
 use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook, OrAssertionHook};
 use crate::epsilon_provider::{EnvEpsilonProvider, EpsilonProvider};
