@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+
     mod empty_enum {
         use shoulda::Shoulda;
 
@@ -223,6 +224,31 @@ mod tests {
                 },
                 "|a: &Vec<i32>| { let _ = &a[0]; } didnt panic",
             );
+        }
+    }
+
+    mod multi_field_enum {
+        use shoulda::Shoulda;
+
+        #[derive(Debug, Shoulda)]
+        enum Thing {
+            Var {
+                name: String,
+                something_else: Vec<String>,
+            },
+        }
+
+        #[test]
+        fn multi_field_enum() {
+            Thing::Var {
+                name: "a".to_string(),
+                something_else: Vec::new(),
+            }
+            .should()
+            .eq(Thing::Var {
+                name: "a".into(),
+                something_else: Vec::new(),
+            });
         }
     }
 }

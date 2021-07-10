@@ -56,12 +56,19 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         Data::Enum(e) => {
             let matches = e.variants.iter().map(|x| {
                 let variant = &x.ident;
-                if x.fields.is_empty() {
-                    quote! {
-                        (#name::#variant, #name::#variant) => true,
+                match &x.fields {
+                    Fields::Named(_) => {
+                    let size = x.fields.iter().enumerate().map(|x| (x.1.ident.as_ref().unwrap().to_string(), format!("__{}",  x.0))).collect::<Vec<(String, String)>>();
+                    let a_var_args = format!("{{{}}}", size.iter().map(|(a,b)|format!("{}:{}a", a,b)).collect::<Vec<String>>().join(","));
+                    let b_var_args = format!("{{{}}}", size.iter().map(|(a,b)|format!("{}:{}b", a,b)).collect::<Vec<String>>().join(","));
+                    let eval: String = size.iter().map(|x|format!("{0}a.should_eq::<Epsilon>({0}b)", x.1)).collect::<Vec<String>>().join(" && ");
+                    format!("({name}::{variant}{a_var_args}, {name}::{variant}{b_var_args}) => {eval}, ",
+                            name = name, variant = variant, a_var_args = a_var_args, b_var_args = b_var_args, eval = eval)
+                        .parse::<TokenStream2>()
+                        .unwrap()
                     }
-                } else {
-                    let size = x.fields.iter().enumerate().map(|x|format!("__{}", x.0)).collect::<Vec<String>>();
+                    Fields::Unnamed(_) => {
+                    let size = x.fields.iter().enumerate().map(|x| format!("__{}", x.0)).collect::<Vec<String>>();
                     let a_var_args = format!("({})", size.iter().map(|x|format!("{}a", x)).collect::<Vec<String>>().join(","));
                     let b_var_args = format!("({})", size.iter().map(|x|format!("{}b", x)).collect::<Vec<String>>().join(","));
                     let eval: String = size.iter().map(|x|format!("{0}a.should_eq::<Epsilon>({0}b)", x)).collect::<Vec<String>>().join(" && ");
@@ -69,6 +76,10 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                             name = name, variant = variant, a_var_args = a_var_args, b_var_args = b_var_args, eval = eval)
                         .parse::<TokenStream2>()
                         .unwrap()
+                    }
+                    Fields::Unit => quote! {
+                        (#name::#variant, #name::#variant) => true,
+                    }
                 }
             }).fold(String::new(), |acc, x| {
                 acc + x.to_string().as_str()
