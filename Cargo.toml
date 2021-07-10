@@ -15,8 +15,8 @@ default = ["fmt"]
 fmt = ["shoulda_macro/fmt"]
 
 [dependencies]
-shoulda_macro = { path = "./shoulda_macro", version = "0.1.11" }
-shoulda_core = { path = "./shoulda_core", version = "0.1.11" }
+shoulda_macro = { path = "./shoulda_macro", version = "0.1.12" }
+shoulda_core = { path = "./shoulda_core", version = "0.1.12" }
 
 [workspace]
 members = ["shoulda_core", "shoulda_macro", "tests"]
