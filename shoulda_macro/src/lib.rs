@@ -97,7 +97,6 @@ pub fn shoulda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let generics = input.generics;
 
     let expanded = quote! {
-        #[cfg(test)]
         impl#generics ::shoulda::core::shoulda_equal::ShouldaEqual for #name#generics {
             fn should_eq<Epsilon: ::shoulda::core::epsilon_provider::EpsilonProvider>(&self, other: &Self) -> bool {
                 #body

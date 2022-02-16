@@ -251,4 +251,36 @@ mod tests {
             });
         }
     }
+
+    mod hashmap {
+        use std::collections::HashMap;
+
+        use shoulda::Shoulda;
+
+        #[derive(Debug, Shoulda)]
+        struct WeirdHashMap(HashMap<Vec<u8>, u32>);
+
+        #[test]
+        fn hashmap() {
+            WeirdHashMap(
+                [
+                    (vec![1, 2, 3], 2),
+                    (vec![1, 2, 3], 2),
+                    (vec![1, 2, 3], 2),
+                    (vec![1, 2, 3], 2),
+                ]
+                .into(),
+            )
+            .should()
+            .eq(WeirdHashMap(
+                [
+                    (vec![1, 2, 3], 2),
+                    (vec![1, 2, 3], 2),
+                    (vec![1, 2, 3], 2),
+                    (vec![1, 2, 3], 2),
+                ]
+                .into(),
+            ));
+        }
+    }
 }

@@ -56,6 +56,7 @@ eq_assertable_impl!(u128);
 eq_assertable_impl!(i128);
 eq_assertable_impl!(usize);
 eq_assertable_impl!(isize);
+eq_assertable_impl!(char);
 
 eq_assertable_impl!(std::num::NonZeroU8);
 eq_assertable_impl!(std::num::NonZeroI8);

@@ -28,14 +28,9 @@ impl From<(bool, String)> for ShouldResult {
     }
 }
 
+#[derive(Default)]
 pub struct ResultsContainer {
     inner: Vec<ShouldResult>,
-}
-
-impl Default for ResultsContainer {
-    fn default() -> Self {
-        Self { inner: Vec::new() }
-    }
 }
 
 impl Drop for ResultsContainer {
