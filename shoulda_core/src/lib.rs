@@ -15,7 +15,6 @@ use crate::assertion_hook::{AssertionHook, NoOpAssertionHook, NotAssertionHook, 
 use crate::epsilon_provider::{EnvEpsilonProvider, EpsilonProvider};
 use crate::should_result::ResultsContainer;
 use crate::shoulda_equal::ShouldaEqual;
-use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::DerefMut;
@@ -81,17 +80,17 @@ where
     Epsilon: EpsilonProvider,
 {
     /// Asserts equality
-    pub fn eq<K: Borrow<Inner>>(mut self, other: K) -> Self {
-        let other = other.borrow();
+    pub fn eq<K: Into<Inner>>(mut self, other: K) -> Self {
+        let other = other.into();
         self.internal_assert(
-            self.inner.should_eq::<Epsilon>(other),
+            self.inner.should_eq::<Epsilon>(&other),
             format!("expected = {:?}, actual = {:?}", &self.inner, other),
         );
         self
     }
 
     /// alias for eq
-    pub fn equal<K: Borrow<Inner>>(self, other: K) -> Self {
+    pub fn equal<K: Into<Inner>>(self, other: K) -> Self {
         self.eq(other)
     }
 }

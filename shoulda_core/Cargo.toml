@@ -1,14 +1,14 @@
 [package]
-authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
-description = "derive macro for test assertions"
-documentation = "https://docs.rs/shoulda_core/0.1.2/shoulda_core/index.html"
 edition = "2018"
 homepage = "https://github.com/cramt/shoulda"
 keywords = ["test", "BDD", "TDD", "assertion"]
 license = "MIT"
 name = "shoulda_core"
 repository = "https://github.com/cramt/shoulda"
-version = "0.1.13"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

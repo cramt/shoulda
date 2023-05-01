@@ -25,6 +25,7 @@ macro_rules! float_assertable_impl {
 }
 
 eq_assertable_impl!(String);
+eq_assertable_impl!(&str);
 eq_assertable_impl!(str);
 eq_assertable_impl!(std::ffi::CString);
 eq_assertable_impl!(std::ffi::CStr);

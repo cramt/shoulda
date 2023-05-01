@@ -22,6 +22,12 @@ fn contains() {
 }
 
 #[test]
+fn string_and_str() {
+    String::new().should().eq("");
+    "".should().eq("");
+}
+
+#[test]
 fn float_diff_changes() {
     //u64 rep of 0.1 f64
     const N: u64 = 4591870180066957722;

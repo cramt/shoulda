@@ -1,25 +1,31 @@
 [package]
-authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
-description = "derive macro for test assertions"
-documentation = "https://docs.rs/shoulda_core/0.1.2/shoulda_core/index.html"
 edition = "2018"
 homepage = "https://github.com/cramt/shoulda"
 keywords = ["test", "BDD", "TDD", "assertion"]
 license = "MIT"
 name = "shoulda"
 repository = "https://github.com/cramt/shoulda"
-version = "0.1.13"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
 
 [features]
 default = ["fmt"]
 fmt = ["shoulda_macro/fmt"]
 
 [dependencies]
-shoulda_core = {path = "./shoulda_core", version = "0.1.13"}
-shoulda_macro = {path = "./shoulda_macro", version = "0.1.13"}
+shoulda_core = { path = "./shoulda_core", version = "0.2.0" }
+shoulda_macro = { path = "./shoulda_macro", version = "0.2.0" }
 
 [workspace]
 members = ["shoulda_core", "shoulda_macro", "tests"]
+
+[workspace.package]
+version = "0.2.0"
+authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
+description = "derive macro for test assertions"
+documentation = "https://docs.rs/shoulda_core/0.1.2/shoulda_core/index.html"
 
 [package.metadata.docs.rs]
 no-default-features = true

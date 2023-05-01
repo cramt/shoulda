@@ -1,14 +1,15 @@
 [package]
-authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
-description = "derive macro for test assertions"
-documentation = "https://github.com/cramt/shoulda"
 edition = "2018"
 homepage = "https://github.com/cramt/shoulda"
 keywords = ["test", "BDD", "TDD", "assertion"]
 license = "MIT"
 name = "shoulda_macro"
 repository = "https://github.com/cramt/shoulda"
-version = "0.1.13"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
+
 
 [lib]
 proc-macro = true
@@ -18,5 +19,5 @@ fmt = ["rustfmt"]
 
 [dependencies]
 quote = "1.0"
-rustfmt = {version = "0.10.0", optional = true}
+rustfmt = { version = "0.10.0", optional = true }
 syn = "1.0"
