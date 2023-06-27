@@ -1,10 +1,12 @@
 [package]
-authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
 edition = "2018"
 name = "tests"
-version = "0.1.2"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+documentation.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-shoulda = {path = "../"}
+shoulda = { path = "../" }

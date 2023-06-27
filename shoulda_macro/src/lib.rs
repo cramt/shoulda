@@ -1,6 +1,3 @@
-mod fmt;
-
-use crate::fmt::format;
 use quote::quote;
 use syn::__private::TokenStream2;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
@@ -8,7 +5,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 #[proc_macro]
 pub fn expr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = TokenStream2::from(input);
-    let str_input = format(input.to_string());
+    let str_input = input.to_string();
     proc_macro::TokenStream::from(
         quote! {::shoulda::core::specifics::panic::Expression::new(#input, #str_input.to_string())},
     )

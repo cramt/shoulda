@@ -21,6 +21,6 @@ pub struct ConstEpsilonProvider<const N: u64>;
 
 impl<const N: u64> EpsilonProvider for ConstEpsilonProvider<N> {
     fn diff() -> f64 {
-        f64::from_bits(N) 
+        f64::from_bits(N)
     }
 }

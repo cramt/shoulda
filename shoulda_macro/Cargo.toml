@@ -14,10 +14,6 @@ documentation.workspace = true
 [lib]
 proc-macro = true
 
-[features]
-fmt = ["rustfmt"]
-
 [dependencies]
 quote = "1.0"
-rustfmt = { version = "0.10.0", optional = true }
 syn = "1.0"

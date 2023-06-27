@@ -10,10 +10,6 @@ authors.workspace = true
 description.workspace = true
 documentation.workspace = true
 
-[features]
-default = ["fmt"]
-fmt = ["shoulda_macro/fmt"]
-
 [dependencies]
 shoulda_core = { path = "./shoulda_core", version = "0.2.0" }
 shoulda_macro = { path = "./shoulda_macro", version = "0.2.0" }
@@ -22,7 +18,7 @@ shoulda_macro = { path = "./shoulda_macro", version = "0.2.0" }
 members = ["shoulda_core", "shoulda_macro", "tests"]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Alexandra Østermark <alex.cramt@gmail.com>"]
 description = "derive macro for test assertions"
 documentation = "https://docs.rs/shoulda_core/0.1.2/shoulda_core/index.html"
